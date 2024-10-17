@@ -5,7 +5,7 @@ from os.path import isfile, join
 from sbleedyCLI.constants import HARDWARE_DIRECTORY
 from sbleedyCLI.models.hardware import Hardware
 
-class HardwareFactory:
+class HardwareEngine:
     def __init__(self,base_dir):
         self.hardware_dir = HARDWARE_DIRECTORY
         self.hardware = None

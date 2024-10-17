@@ -1,6 +1,3 @@
 name: "hci"
 description: "HCI Bluetooth Adapter"
 needs_setup_verification: true
-working_directory: null
-bt_version_min: 1.0
-bt_version_max: 5.4

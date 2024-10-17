@@ -9,9 +9,10 @@ from rich.table import Table
 from rich.console import Console
 
 from .constants import TOOL_DIRECTORY, LOG_FILE
-from .factories.exploitfactory import ExploitFactory
-from .factories.hardwarefactory import HardwareFactory
-from .factories.setupverificationfactory import SetupVerifier
+from .engines.exploitEngine import ExploitEngine
+from .engines.hardwareEngine import HardwareEngine
+from .engines.setupverificationEngine import SetupVerifierEngine
+from .recon import Recon
 
 class Sbleedy():
     def __init__(self) -> None:
@@ -21,12 +22,12 @@ class Sbleedy():
         self.exploits_to_scan = []
         self.target = None
         self.parameters = None
-        self.exploitFactory = ExploitFactory(TOOL_DIRECTORY)
-        self.hardwareFactory = HardwareFactory(TOOL_DIRECTORY)
+        self.exploitEngine = ExploitEngine(TOOL_DIRECTORY)
+        self.hardwareEngine = HardwareEngine(TOOL_DIRECTORY)
         #self.engine = Engine()
         #self.checkpoint = Checkpoint()
-        self.setupverifier = SetupVerifier()
-        #self.recon = Recon()
+        self.setupverifier = SetupVerifierEngine()
+        self.recon = Recon()
         #self.report = Report()
     
     def spleedy_signal_handler(self, sig, frame):
@@ -50,13 +51,13 @@ class Sbleedy():
         self.set_exploits(available_exploits)
 
     def get_available_exploits(self):
-        return self.exploitFactory.get_all_exploits()
+        return self.exploitEngine.get_all_exploits()
     
     def get_available_hardware(self):
-        return self.hardwareFactory.get_all_hardware_profiles()
+        return self.hardwareEngine.get_all_hardware_profiles()
     
     def check_hardware(self):
-        available_hardware = self.hardwareFactory.get_all_hardware_profiles()
+        available_hardware = self.hardwareEngine.get_all_hardware_profiles()
         hardware_verified = self.setupverifier.verify_setup_multiple_hardware(available_hardware)
         print("Hardware availability:")
         for hardware in available_hardware:
@@ -87,7 +88,7 @@ class Sbleedy():
         table.add_column("BT max", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
-            symbol = '[red]❌[/red]' 
+            symbol = '[red]X[/red]' 
             if hardware_verified[exploit.hardware]:
                 symbol = '[green]✓[/green]'  
 
@@ -103,6 +104,33 @@ class Sbleedy():
 
         console = Console()
         console.print(table)
+    
+    def check_target(self, target):
+        cont = True
+        while cont:
+            for i in range(10):
+                available = self.recon.check_availability(target)
+                if available:
+                    return True
+            if not available:
+                inp = self.connection_lost()
+    
+    def connection_lost(self) -> None:
+        command = input("The target device is not available. Try restoring the connectivity. After that enter 1 of the following commands: continue, backup:\n")
+        if command == "continue":
+            print("Trying to verify connectivity again")
+        elif command == "backup":
+            print("Backing up")
+            self.preserve_state()
+            raise SystemExit
+        else:
+            print("Didn't understand your input")
+            connection_lost(self)
+    
+    def run_recon(self, target):
+        self.recon.run_recon(target)
+        v = self.recon.determine_bluetooth_version(target)
+        print(f"Bluetooth Version of target device: {v}")
 
 def main():
     parser = argparse.ArgumentParser(description="SbleedyGonzales CLI tool")
@@ -110,7 +138,6 @@ def main():
     parser.add_argument('-l','--listexploits', required=False, action='store_true', help="List all exploits yes/no")
     parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check connectivity and availability of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
-    parser.add_argument('-v','--verbosity',  required=False, action='store_true', help="Verbosity on/off")
     parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits (--exclude exploit1, exploit2)")
     parser.add_argument('-e', '--exploits', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (--exploits exploit1, exploit2), --exclude is not taken into account")
     parser.add_argument('-r', '--recon', required=False, action='store_true', help="Run a recon script")
@@ -147,12 +174,10 @@ def main():
             logging.info("Provided --exclude parameter -> " + str(args.exclude))
 
         if args.checktarget:
-            print("TODO")
-            #expRunner.check_target(args.target)
+            expRunner.check_target(args.target)
         else:
             if args.recon:
-                print("TODO")
-                #expRunner.run_recon(args.target)
+                expRunner.run_recon(args.target)
             elif args.report:
                 print("TODO")
                 #expRunner.generate_report(args.target)

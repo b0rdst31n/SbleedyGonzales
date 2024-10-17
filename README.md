@@ -18,13 +18,11 @@ options:
   -l, --listexploits    List exploits or not
   -ct, --checktarget    Check connectivity and availability of the target
   -ch, --checkpoint     Start from a checkpoint (if one exists for the given target)
-  -v VERBOSITY, --verbosity
-                        Verbosity on or off
   -ex EXPLOITS [EXPLOITS ...], --exclude EXPLOITS [EXPLOITS ...]
                         Exclude exploits, example --exclude exploit1, exploit2
   -e EXPLOITS [EXPLOITS ...], --exploits EXPLOITS [EXPLOITS ...]
                         Scan only for provided --exploits exploit1, exploit2; --exclude is not taken into account
-  -r, --recon           Run a recon script
+  -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device
   -hw HARDWARE [HARDWARE ...], --hardware HARDWARE [HARDWARE ...]

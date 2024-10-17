@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'pyyaml',
         'rich',
-        'setuptools'
+        'setuptools',
+        'pyserial'
     ],
 )
