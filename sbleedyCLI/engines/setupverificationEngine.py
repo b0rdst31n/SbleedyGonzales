@@ -44,6 +44,7 @@ class SetupVerifierEngine():
             logging.info('SetupVerifierEngine -> check_setup_hci -> No HCI Bluetooth Adapter found')
         except subprocess.CalledProcessError as e:
             logging.info("SetupVerifierEngine -> check_setup_hci -> Error during checking hci setup")
+        print("No hci devices found.")
         return False
     
     @staticmethod
@@ -55,7 +56,7 @@ class SetupVerifierEngine():
             logging.info("SetupVerifierEngine -> check_setup_nRF -> No available port found")
             return False
         for port in ports:
-            if "nRF Sniffer" in port.description:
+            if "nRF" in port.description:
                 print(f"Automatically selected port: {port.device} with {port.description}")
                 hardware.port = port.device
                 return True

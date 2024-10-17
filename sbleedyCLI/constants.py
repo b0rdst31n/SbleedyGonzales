@@ -7,7 +7,7 @@ EXPLOIT_YAML_DIRECTORY = TOOL_DIRECTORY + '/exploits/'
 EXPLOIT_TOOL_DIRECTORY = TOOL_DIRECTORY + '/modules/'
 HARDWARE_DIRECTORY = TOOL_DIRECTORY + '/hardware/'
 FIRMWARE_DIRECTORY = HARDWARE_DIRECTORY + '/firmware/'
-OUTPUT_DIRECTORY = TOOL_DIRECTORY + '/results/{target}/{exploit}/'
+OUTPUT_DIRECTORY = TOOL_DIRECTORY + '/results/{target}/'
 
 TIMEOUT = 40
 NUMBER_OF_DOS_TESTS = 10
@@ -24,6 +24,27 @@ LESCAN = "sudo hcitool lescan"
 HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
 BLUING_BR_SDP = ("sudo bluing br --sdp {target}", "bluing_sdp.log")
 BLUING_BR_LMP = ("sudo bluing br --lmp-features {target}", "bluing_lmp.log")
-REGEX_BT_VERSION = "Bluetooth Core Specification [0-9]{1}(\.){0,1}[0-9]{0,1}\ "
-REGEX_BT_VERSION_HCITOOL = "\(0x[0-f]{1}\) LMP Subversion:"
-REGEX_BT_MANUFACTURER = "Manufacturer name: .*\n"
+REGEX_BT_VERSION = r"Bluetooth Core Specification [0-9]{1}(\.){0,1}[0-9]{0,1}\ "
+REGEX_BT_VERSION_HCITOOL = r"\(0x[0-f]{1}\) LMP Subversion:"
+REGEX_BT_MANUFACTURER = r"Manufacturer name: .*\n"
+
+REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY DATA:.*\n"
+REGEX_EXPLOIT_OUTPUT_DATA_CODE = b" code=[0-4],"
+REGEX_EXPLOIT_OUTPUT_DATA_DATA = b", data=.*"
+
+VERSION_TABLE = {
+    "0x0":1.0,
+    "0x1":1.1,
+    "0x2":1.2,
+    "0x3":2.0,
+    "0x4":2.1,
+    "0x5":3.0,
+    "0x6":4.0,
+    "0x7":4.1,
+    "0x8":4.2,
+    "0x9":5.0,
+    "0xa":5.1,
+    "0xb":5.2,
+    "0xc":5.3,
+    "0xd":5.4
+}

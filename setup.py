@@ -13,6 +13,9 @@ setup(
         'pyyaml',
         'rich',
         'setuptools',
-        'pyserial'
+        'pyserial',
+        'psutil',
+        'tqdm',
+        'scapy'
     ],
 )

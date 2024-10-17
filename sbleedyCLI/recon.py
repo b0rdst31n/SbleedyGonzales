@@ -7,7 +7,7 @@ import time
 import signal
 from pathlib import Path
 
-from .constants import LESCAN, HCITOOL_INFO, BLUING_BR_LMP, BLUING_BR_SDP, OUTPUT_DIRECTORY, REGEX_BT_VERSION, REGEX_BT_VERSION_HCITOOL, LOG_FILE, REGEX_BT_MANUFACTURER
+from .constants import LESCAN, HCITOOL_INFO, BLUING_BR_LMP, BLUING_BR_SDP, OUTPUT_DIRECTORY, REGEX_BT_VERSION, REGEX_BT_VERSION_HCITOOL, LOG_FILE, REGEX_BT_MANUFACTURER, VERSION_TABLE
 
 COMMANDS = [HCITOOL_INFO, BLUING_BR_SDP, BLUING_BR_LMP]
 
@@ -39,13 +39,13 @@ class Recon():
         return False
 
     def run_recon(self, target):
-        log_dir = OUTPUT_DIRECTORY.format(target=target, exploit='recon')
+        log_dir = OUTPUT_DIRECTORY.format(target=target) + "recon/"
         Path(log_dir).mkdir(exist_ok=True, parents=True)
         for command, filename in COMMANDS:
             self.run_command(target, command, log_dir + filename)
     
     def determine_bluetooth_version(self, target) -> float:
-        file_path = Path(OUTPUT_DIRECTORY.format(target=target, exploit='recon') + BLUING_BR_LMP[1])
+        file_path = Path(OUTPUT_DIRECTORY.format(target=target) + "recon/" + BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
@@ -53,7 +53,7 @@ class Recon():
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
         else:
-            file_path = Path(OUTPUT_DIRECTORY.format(target=target, exploit='recon') + HCITOOL_INFO[1])
+            file_path = Path(OUTPUT_DIRECTORY.format(target=target) + "recon/" + HCITOOL_INFO[1])
             if file_path.is_file():
                 with file_path.open('r') as f:
                     text = f.read()
@@ -66,7 +66,6 @@ class Recon():
                     except Exception as e:
                         print("Error during retrieving a version")
         return None 
- 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

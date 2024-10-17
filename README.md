@@ -9,7 +9,7 @@ sbleedy [OPTIONS] [COMMANDS]
 ```
 
 ```console
-usage: sbleedy [-h] [-t TARGET] [-l] [-ct] [-v] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-e EXPLOITS [EXPLOITS ...]] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-chw] ...
+usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-e EXPLOITS [EXPLOITS ...]] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] ...
 
 options:
   -h, --help            show this help message and exit
