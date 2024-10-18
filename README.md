@@ -2,6 +2,10 @@
 
 SbleedyGonzales is a CLI tool designed to perform various checks and operations on target devices and networks. It supports multiple functionalities such as running exploits, listing available options, checking connectivity, creating reports, and more.
 
+## Installation
+
+Requires Python3 (for the main exploit runner) and Python2.7 (for Sweyntooth)
+
 ## Usage
 
 ```bash
