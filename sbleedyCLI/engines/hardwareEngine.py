@@ -6,7 +6,7 @@ from sbleedyCLI.constants import HARDWARE_DIRECTORY
 from sbleedyCLI.models.hardware import Hardware
 
 class HardwareEngine:
-    def __init__(self,base_dir):
+    def __init__(self):
         self.hardware_dir = HARDWARE_DIRECTORY
         self.hardware = None
 
@@ -26,5 +26,9 @@ class HardwareEngine:
         f.close()
         return Hardware(details)
 
+    def get_hardware_port(self, hardware_name):
+        for hw in self.hardware:
+            if hw.name == hardware_name:
+                return hw.port
 
 

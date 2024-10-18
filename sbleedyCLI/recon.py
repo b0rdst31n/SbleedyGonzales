@@ -14,18 +14,6 @@ COMMANDS = [HCITOOL_INFO, BLUING_BR_SDP, BLUING_BR_LMP]
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
 class Recon():
-    def check_availability(self, target):
-        print("Checking device availability...")
-        process = subprocess.Popen(LESCAN.split(), stdout=subprocess.PIPE)
-        time.sleep(10)
-        os.kill(process.pid, signal.SIGINT)
-        output = process.communicate()[0].decode("utf-8")
-        if target in output:
-            print("Device is available.")
-            return True
-        print("Device is not available.")
-        return False
-
     def run_command(self, target, command, filename):
         print("Running command -> {}".format(command))
         try:

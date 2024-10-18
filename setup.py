@@ -72,7 +72,9 @@ setup(
         'pyserial',
         'psutil',
         'tqdm',
-        'scapy'
+        'scapy',
+        'colorama',
+        'tabulate'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

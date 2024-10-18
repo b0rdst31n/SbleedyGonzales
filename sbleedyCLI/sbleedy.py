@@ -4,6 +4,9 @@ import sys
 import argparse
 import logging
 import signal
+import itertools
+import threading
+import time
 from tqdm import tqdm
 from pathlib import Path
 from rich.table import Table
@@ -14,7 +17,9 @@ from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.setupverificationEngine import SetupVerifierEngine
 from .engines.sbleedyEngine import SbleedyEngine
+from sbleedyCLI.engines.connectionEngine import check_availability
 from .recon import Recon
+from .report import Report
 
 class Sbleedy():
     def __init__(self) -> None:
@@ -24,13 +29,13 @@ class Sbleedy():
         self.exploits_to_scan = []
         self.target = None
         self.parameters = None
-        self.exploitEngine = ExploitEngine(TOOL_DIRECTORY)
-        self.hardwareEngine = HardwareEngine(TOOL_DIRECTORY)
+        self.exploitEngine = ExploitEngine()
+        self.hardwareEngine = HardwareEngine()
         self.engine = SbleedyEngine()
         #self.checkpoint = Checkpoint()
         self.setupverifier = SetupVerifierEngine()
         self.recon = Recon()
-        #self.report = Report()
+        self.report = Report()
     
     def spleedy_signal_handler(self, sig, frame):
         print("Ctrl+C detected. Creating a checkpoint and exiting")
@@ -80,14 +85,15 @@ class Sbleedy():
         available_exploits = sorted(available_exploits, key=lambda x: x.hardware)
         available_exploits = sorted(available_exploits, key=lambda x: not hardware_verified[x.hardware])
 
+        print("\n")
         table = Table(title="Available Exploits")
         table.add_column("Index", justify="center", style="cyan", no_wrap=True)
         table.add_column("Exploit", style="magenta")
         table.add_column("Type", style="green")
         table.add_column("Hardware", style="blue")
         table.add_column("Available", justify="center")
-        table.add_column("BT min", justify="center")
-        table.add_column("BT max", justify="center")
+        table.add_column("BT version", justify="center")
+        table.add_column("Affected", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
             symbol = '[red]X[/red]' 
@@ -96,12 +102,12 @@ class Sbleedy():
 
             table.add_row(
                 str(index),
-                exploit.name,
+                ' '.join(word.capitalize() for word in exploit.name.split('_')),
                 exploit.type,
                 exploit.hardware,
                 symbol,
-                str(exploit.bt_version_min),
-                str(exploit.bt_version_max)
+                f"{exploit.bt_version_min}-{exploit.bt_version_max}",
+                exploit.affected
             )
 
         console = Console()
@@ -111,7 +117,7 @@ class Sbleedy():
         cont = True
         while cont:
             for i in range(10):
-                available = self.recon.check_availability(target)
+                available = check_availability(target)
                 if available:
                     return True
             if not available:
@@ -173,7 +179,29 @@ class Sbleedy():
         return exploits
     
     def test_exploit(self, target, current_exploit, parameters) -> tuple:
-        return self.engine.run_test(target, current_exploit, parameters)
+        current_port = self.hardwareEngine.get_hardware_port(current_exploit.hardware)
+        print(f"Currently running {current_exploit.name}... ", end="")
+        sys.stdout.flush()
+
+        stop_spinner = False
+        def spinner_task():
+            spinner = self.spinning_cursor()
+            while not stop_spinner:
+                sys.stdout.write(next(spinner))  
+                sys.stdout.flush()
+                time.sleep(0.1)  
+                sys.stdout.write('\b')
+
+        spinner_thread = threading.Thread(target=spinner_task)
+        spinner_thread.start()
+
+        try:
+            result = self.engine.run_test(target, current_port, current_exploit, parameters)
+        finally:
+            stop_spinner = True
+            spinner_thread.join()
+        
+        return result
         
     def test_one_by_one(self, target, parameters, exploits) -> None:
         for i in tqdm(range(0, len(exploits), 1), desc="Testing exploits"):
@@ -181,7 +209,20 @@ class Sbleedy():
             response_code, data = self.test_exploit(target, exploits[i], parameters)
             self.done_exploits.append([exploits[i].name, response_code, data])
             logging.info("Sbleedy.test_one_by_one -> done exploits - " + str(self.done_exploits))
-            #self.report.save_data(exploit_name=exploits[i].name, target=target, data=data, code=response_code)
+            self.report.save_data(exploit_name=exploits[i].name, target=target, data=data, code=response_code)
+    
+    def spinning_cursor(self):
+        spinner = itertools.cycle(['|', '/', '-', '\\'])
+        while True:
+            yield next(spinner)
+    
+    def generate_report(self, target):
+        table = self.report.generate_report(target=target)
+        console = Console()
+        console.print(table)
+    
+    def generate_machine_readble_report(self, target):
+        self.report.generate_machine_readable_report(target=target)
 
 def print_header():
     terminal_width = (os.get_terminal_size().columns)
@@ -226,6 +267,8 @@ def main():
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
+    with open(LOG_FILE, 'w'):
+        pass
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     logging.info('Started')
     script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -260,11 +303,9 @@ def main():
             if args.recon:
                 expRunner.run_recon(args.target)
             elif args.report:
-                print("TODO")
-                #expRunner.generate_report(args.target)
+                expRunner.generate_report(args.target)
             elif args.reportjson:
-                print("TODO")
-                #expRunner.generate_machine_readble_report(args.target)
+                expRunner.generate_machine_readble_report(args.target)
             elif args.checkpoint:
                 print("TODO")
                 #expRunner.start_from_a_checkpoint(args.target)
