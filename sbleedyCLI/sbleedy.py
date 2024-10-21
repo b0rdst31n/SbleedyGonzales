@@ -71,13 +71,6 @@ class Sbleedy():
     def get_available_hardware(self):
         return self.hardwareEngine.get_all_hardware_profiles()
     
-    def check_hardware(self):
-        available_hardware = self.hardwareEngine.get_all_hardware_profiles()
-        hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
-        print("\nHardware availability:")
-        for hardware in available_hardware:
-            print("{hardware} - status {availability}".format(hardware=hardware.name, availability=hardware_verified[hardware.name]))
-    
     def get_exploits_with_setup(self, available_exploits=None):
         if not available_exploits:
             available_exploits = self.get_available_exploits()
@@ -289,6 +282,7 @@ def main():
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-hw', '--hardware', required=False, nargs='+', default=[], type=str, help="Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account")
     parser.add_argument('-chw','--checkhardware', required=False, action='store_true',  help="Check for connected hardware")
+    parser.add_argument('-fh','--flashhardware', required=False, type=str,  help="Flash connected hardware")
     parser.add_argument('-v','--verbose',  required=False, action='store_true', help="Additional output during exploit execution")
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
@@ -313,7 +307,9 @@ def main():
     if args.listexploits:
         expRunner.print_available_exploits()
     elif args.checkhardware:
-        expRunner.check_hardware()
+        expRunner.hardwareEngine.check_hardware()
+    elif args.flashhardware:
+        expRunner.hardwareEngine.flash_hardware(args.flashhardware)
     elif args.target:
         if len(args.hardware) > 0:
             av_hardware_list = []

@@ -2,5 +2,4 @@ name: "nRF52840"
 description: "Nordic nRF52840 Dongle"
 needs_setup_verification: true
 firmware:
-  - name: "sweyntooth"
-    command: "flash_sweyntooth_firmware.sh"
+  - "Sweyntooth": "flash_sweyntooth_firmware.sh"

@@ -1,22 +1,21 @@
 import yaml
-from os import listdir
-from os.path import isfile, join
+import os
+import stat
 import subprocess
 import logging
 import re
 import serial.tools.list_ports
 
-from sbleedyCLI.constants import HARDWARE_DIRECTORY
+from sbleedyCLI.constants import HARDWARE_DIRECTORY, FIRMWARE_DIRECTORY
 from sbleedyCLI.models.hardware import Hardware
 
 class HardwareEngine:
     def __init__(self):
-        self.hardware_dir = HARDWARE_DIRECTORY
         self.hardware = None
 
     def get_all_hardware_profiles(self, force_reload=False):
         if self.hardware is None or force_reload:
-            onlyfiles = [join(self.hardware_dir, f) for f in listdir(self.hardware_dir) if isfile(join(self.hardware_dir, f))]
+            onlyfiles = [os.path.join(HARDWARE_DIRECTORY, f) for f in os.listdir(HARDWARE_DIRECTORY) if os.path.isfile(os.path.join(HARDWARE_DIRECTORY, f))]
             
             hardware_profiles = []
             for filename in onlyfiles:
@@ -50,6 +49,52 @@ class HardwareEngine:
         for hardware in multiple_hardware:
             hardware_verification[hardware.name] = self.verify_setup(hardware)
         return hardware_verification
+    
+    def flash_hardware(self, hw_name):
+        available_hardware = self.get_all_hardware_profiles()
+        hardware_verified = self.verify_setup_multiple_hardware(available_hardware)
+        
+        if not hardware_verified[hw_name]:
+            print(f"\nHardware {hw_name} not available.")
+            return
+
+        for hw in self.hardware:
+            if hw.name == hw_name:
+                if not hw.firmware:
+                    print(f"\nNo firmware available for {hw_name}.")
+                    return
+                else:
+                    selected_hardware = hw
+                    break
+        
+        print(f"\nAvailable firmware for {hw_name}:")
+        for idx, fw in enumerate(selected_hardware.firmware):
+            print(f"[{idx+1}] {list(fw.keys())[0]}")
+        
+        try:
+            choice = int(input(f"Select the index of the firmware to flash: "))
+            if 1 <= choice <= len(selected_hardware.firmware):
+                selected_firmware = selected_hardware.firmware[choice-1]
+                firmware_name = list(selected_firmware.keys())[0]
+                print(f"Flashing {hw_name} with firmware {firmware_name} on {selected_hardware.port}...\n")
+                script_path = os.path.join(FIRMWARE_DIRECTORY, selected_firmware[firmware_name])
+                if not os.access(script_path, os.X_OK):
+                    os.chmod(script_path, os.stat(script_path).st_mode | stat.S_IEXEC)
+                subprocess.run([script_path, selected_hardware.port], check=True)
+                return
+            else:
+                print(f"Invalid choice.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error during flashing: {e}")
+
+    def check_hardware(self):
+        available_hardware = self.get_all_hardware_profiles()
+        hardware_verified = self.verify_setup_multiple_hardware(available_hardware)
+        print("\nHardware availability:")
+        for hardware in available_hardware:
+            print(f"{hardware.name} - {'Available' if hardware_verified[hardware.name] else 'Not Available'}")
 
     @staticmethod
     def check_setup_hci(hardware) -> bool:
@@ -83,10 +128,10 @@ class HardwareEngine:
                 subprocess.run(['sudo', 'hciconfig', hardware.port, 'down'], check=True)
                 subprocess.run(['sudo', 'hciconfig', hardware.port, 'up'], check=True)
                 print(f"{hardware.port} restarted successfully.")
+                return True
             except subprocess.CalledProcessError as e:
                 print(f"Error restarting {hardware.port}: {e}")
-
-                return True
+                return False
         except subprocess.CalledProcessError as e:
             logging.info("HardwareEngine -> check_setup_hci -> Error during checking hci setup")
             return False
