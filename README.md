@@ -36,10 +36,10 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 2. **Create and Activate Virtual Environments**:
     Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.x. You can use `virtualenv` to create them:
    
-    - Python 3.x:
+    - Python 3.10:
 
       ```bash
-      virtualenv -p python3 venv3
+      virtualenv -p python3.10 venv3
       source venv3/bin/activate
       ```
 
@@ -49,6 +49,8 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
       virtualenv -p python2.7 venv2
       source venv2/bin/activate
       ```
+
+      If you choose a different name for this virtualenv, please adapt the VENV2_PATH in sbleedyCLI/constants.py.
 
 3. **Install Dependencies**:
     Install the required Python packages using pip:
@@ -73,7 +75,7 @@ Requires Python3.10 (for the main exploit runner) and Python2.7 (for Sweyntooth)
 ## Usage
 
 ```console
-usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-e EXPLOITS [EXPLOITS ...]] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] ...
+usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-e EXPLOITS [EXPLOITS ...]] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-v] ...
 
 options:
   -h, --help            show this help message and exit
@@ -92,6 +94,7 @@ options:
   -hw HARDWARE [HARDWARE ...], --hardware HARDWARE [HARDWARE ...]
                         Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account
   -chw, --checkhardware Check for connected hardware
+  -v, --verbose         Verbosity on/off (additional output during exploit execution), saved in results/{target}/exploit_output.log
 
 EXAMPLES:
 Run sbleedy recon:

@@ -17,6 +17,7 @@ class SbleedyEngine:
     def __init__(self):
         self.logger = logging.getLogger('sbleedy_logger')
         self.logger.setLevel(logging.DEBUG)
+        self.verbosity = False
 
     def construct_exploit_command(self, target: str, port: str, current_exploit: Exploit, parameters: list) -> str:
         exploit_command = current_exploit.command.split(' ')
@@ -93,13 +94,18 @@ class SbleedyEngine:
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit_name, exploit_command))
-            command = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)         # for some reason doesn't accept tokenized exploit_command (leads to a bug)
-            pid = command.pid
+            with open(os.path.join(const.OUTPUT_DIRECTORY.format(target=target) + "exploit_output.log"), "ab") as f:
+                f.write(f"\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
+                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)         # for some reason doesn't accept tokenized exploit_command (leads to a bug)
+                for c in iter(lambda: process.stdout.read(1), b""):
+                    if self.verbosity:
+                        sys.stdout.buffer.write(c)
+                        f.write(c)
             
             logging.info("SbleedyEngine.execute_command -> sleeping for {} seconds".format(timeout))
                 
-            new_xdata = command.wait(timeout=timeout)
-            new_data = command.communicate()
+            new_xdata = process.wait(timeout=timeout)
+            new_data = process.communicate()
             logging.info("SbleedyEngine.execute_command -> command.communicate " + str(new_data))
             if type(new_data) is int:
                 print(new_data)
@@ -108,9 +114,9 @@ class SbleedyEngine:
             data = True, new_data
         except subprocess.TimeoutExpired as e:
             logging.info("SbleedyEngine.execute_command -> Killing the exploit and sleeping for another 1 second")
-            for child in psutil.Process(pid).children(recursive=True):
+            for child in psutil.Process(process.pid).children(recursive=True):
                 child.kill()
-            os.killpg(os.getpgid(command.pid), signal.SIGTERM)
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
             time.sleep(1)
         
         os.chdir(const.TOOL_DIRECTORY)

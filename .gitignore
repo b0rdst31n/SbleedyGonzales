@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 *.log
-.git-old
 build/
 venv2/
 venv3/

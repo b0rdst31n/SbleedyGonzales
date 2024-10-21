@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 
-from .constants import TOOL_DIRECTORY, LOG_FILE
+from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY
 from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.sbleedyEngine import SbleedyEngine
@@ -48,7 +48,7 @@ class Sbleedy():
     def set_exclude_exploits(self, exclude_exploits: list):
         only_numbers = all(re.match(r'^[0-9, -]+$', s) for s in exclude_exploits)
         if only_numbers:
-            self.exclude_exploits = self.get_exploits_by_index(exclude_exploits)
+            self.exclude_exploits = self.exploitEngine.get_exploits_by_index(exclude_exploits)
         else: 
             self.exclude_exploits = exclude_exploits
     
@@ -58,32 +58,6 @@ class Sbleedy():
             self.exploits_to_scan = self.get_exploits_by_index(exploits_to_scan)
         else: 
             self.exploits_to_scan = exploits_to_scan
-    
-    def get_exploits_by_index(self, exploits: list):
-        selected_exploits = []
-        av_exploits = self.get_available_exploits()
-
-        for item in exploits:
-            if ',' in item:
-                indices = item.split(',')
-                for index in indices:
-                    try:
-                        index = int(index)
-                        selected_exploits.append(av_exploits[index - 1].name)
-                    except (ValueError, IndexError):
-                        print(f"Skipping invalid or out-of-range value: {index}")
-
-            elif '-' in item:
-                start, end = map(int, item.split('-'))
-                selected_exploits.extend([exploit.name for exploit in av_exploits[start - 1:end]])
-            else:
-                try:
-                    index = int(item)
-                    selected_exploits.append(av_exploits[index - 1].name)
-                except ValueError:
-                    print(f"Skipping non-numeric value: {item}")
-
-        return selected_exploits
     
     def set_exploits_hardware(self, hardware: list):
         available_exploits = self.get_available_exploits()
@@ -165,7 +139,7 @@ class Sbleedy():
             self.preserve_state()
             raise SystemExit
         else:
-            print("Didn't understand your input")
+            print("Invalid input")
             connection_lost(self)
     
     def run_recon(self, target):
@@ -181,8 +155,10 @@ class Sbleedy():
         available_exploits = self.get_available_exploits()
         exploits_with_setup = self.exploit_filter(target=target, exploits=self.get_exploits_with_setup())
 
-        print("There are {} out of {} exploits available.\n".format(len(exploits_with_setup), len(available_exploits)))
-        print("Running the following exploits: {}".format([exploit.name for exploit in exploits_with_setup]))
+        print("\nThere are {} out of {} exploits available.".format(len(exploits_with_setup), len(available_exploits)))
+        print("Running the following exploits: {}\n".format([exploit.name for exploit in exploits_with_setup]))
+
+        Path(os.path.join(OUTPUT_DIRECTORY.format(target=target))).mkdir(exist_ok=True, parents=True)
 
         exploit_pool = exploits_with_setup
         self.parameters = parameters
@@ -190,8 +166,7 @@ class Sbleedy():
         self.test_one_by_one(target, self.parameters, exploit_pool)
     
     def exploit_filter(self, target, exploits) -> list:
-        version = self.recon.determine_bluetooth_version(target)
-
+        print("\nSkipping all exploits that require unavailable hardware.")
         logging.info("start_from_cli_all -> available exploit amount - {}".format(len(exploits)))
         logging.info("start_from_cli_all -> exploits to scan amount - {}".format(len(self.exploits_to_scan)))
 
@@ -199,17 +174,14 @@ class Sbleedy():
             exploits = [exploit for exploit in exploits if exploit.name in set(self.exploits_to_scan)]
         elif self.exclude_exploits:
             exploits = [exploit for exploit in exploits if exploit.name not in set(self.exclude_exploits)]
-
         logging.info(f"start_from_cli_all -> chosen exploit amount - {len(exploits)}")
 
-        exploits = [exploit for exploit in exploits if exploit.mass_testing]
+        #exploits = [exploit for exploit in exploits if exploit.mass_testing]
 
-        print("\nSkipping all exploits that require unavailable hardware.")
-
+        version = self.recon.determine_bluetooth_version(target)
         if version is not None:
             print(f"Skipping all exploits that do not apply to the Bluetooth version of the target: {version}")
-            logging.info("Target Bluetooth version: {}".format(version))
-            logging.info("Skipping all exploits that do not apply to this version.")
+            logging.info(f"Target Bluetooth version: {version}. Skipping all exploits that do not apply to this version.")
             exploits = [exploit for exploit in exploits if float(exploit.bt_version_min) <= float(version) and float(version) <= float(exploit.bt_version_max)]
             logging.info("There are {} exploits to work on".format(len(exploits)) )
 
@@ -301,6 +273,7 @@ def main():
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-hw', '--hardware', required=False, nargs='+', default=[], type=str, help="Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account")
     parser.add_argument('-chw','--checkhardware', required=False, action='store_true',  help="Check for connected hardware")
+    parser.add_argument('-v','--verbose',  required=False, action='store_true', help="Additional output during exploit execution")
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
@@ -319,6 +292,8 @@ def main():
 
     os.chdir(TOOL_DIRECTORY)
     expRunner = Sbleedy()
+    if args.verbose:
+        expRunner.engine.verbosity = True
     if args.listexploits:
         expRunner.print_available_exploits()
     elif args.checkhardware:
