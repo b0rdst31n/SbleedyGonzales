@@ -20,6 +20,7 @@ from .engines.sbleedyEngine import SbleedyEngine
 from sbleedyCLI.engines.connectionEngine import check_availability
 from .recon import Recon
 from .report import Report
+from .checkpoint import Checkpoint
 
 class Sbleedy():
     def __init__(self) -> None:
@@ -32,13 +33,13 @@ class Sbleedy():
         self.exploitEngine = ExploitEngine()
         self.hardwareEngine = HardwareEngine()
         self.engine = SbleedyEngine()
-        #self.checkpoint = Checkpoint()
+        self.checkpoint = Checkpoint()
         self.recon = Recon()
         self.report = Report()
     
     def spleedy_signal_handler(self, sig, frame):
         print("Ctrl+C detected. Creating a checkpoint and exiting")
-        #self.preserve_state()
+        self.preserve_state()
         os.chdir(TOOL_DIRECTORY)
         sys.exit()
     
@@ -77,8 +78,9 @@ class Sbleedy():
         for hardware in available_hardware:
             print("{hardware} - status {availability}".format(hardware=hardware.name, availability=hardware_verified[hardware.name]))
     
-    def get_exploits_with_setup(self):
-        available_exploits = self.get_available_exploits()
+    def get_exploits_with_setup(self, available_exploits=None):
+        if not available_exploits:
+            available_exploits = self.get_available_exploits()
         available_hardware = self.get_available_hardware()
         hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         return [exploit for exploit in available_exploits if hardware_verified[exploit.hardware]]
@@ -232,7 +234,21 @@ class Sbleedy():
     
     def generate_machine_readable_report(self, target):
         self.report.generate_machine_readable_report(target=target)
+    
+    def start_from_a_checkpoint(self, target) -> None:
+        if self.checkpoint.check_if_checkpoint(target):
+            exploit_pool, self.done_exploits, self.parameters, self.target, self.exploits_to_scan, self.exclude_exploits = self.checkpoint.load_state(target)        
+            exploit_pool = self.exploit_filter(target=self.target, exploits=self.get_exploits_with_setup(exploit_pool))
+            available_exploits = self.get_available_exploits()
 
+            print(f"There are {len(exploit_pool) + len(self.done_exploits)} out of {len(available_exploits)} exploits available. {len(self.done_exploits)} exploits have already been tested.\n")                                                                                   
+            print(f"Running the following exploits: {[exploit.name for exploit in exploit_pool]}")
+
+            self.test_one_by_one(self.target, self.parameters, exploit_pool)
+
+    def preserve_state(self) -> None:
+        self.checkpoint.preserve_state(self.get_available_exploits(), self.done_exploits, self.target, self.parameters, self.exploits_to_scan, self.exclude_exploits)
+        
 def print_header():
     terminal_width = (os.get_terminal_size().columns)
     ascii_art = r"""
@@ -332,8 +348,7 @@ def main():
             elif args.reportjson:
                 expRunner.generate_machine_readable_report(args.target)
             elif args.checkpoint:
-                print("TODO")
-                #expRunner.start_from_a_checkpoint(args.target)
+                expRunner.start_from_a_checkpoint(args.target)
             else:
                 expRunner.start_from_cli_all(args.target, args.rest)
     else:
