@@ -93,9 +93,9 @@ class Sbleedy():
         table.add_column("Exploit", style="magenta")
         table.add_column("Type", style="green")
         table.add_column("Hardware", style="blue")
+        table.add_column("BT Version", justify="center")
+        table.add_column("BT Profile", justify="center")
         table.add_column("Available", justify="center")
-        table.add_column("BT version", justify="center")
-        table.add_column("Affected", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
             symbol = '[red]X[/red]' 
@@ -107,9 +107,9 @@ class Sbleedy():
                 ' '.join(word.capitalize() for word in exploit.name.split('_')),
                 exploit.type,
                 exploit.hardware,
-                symbol,
-                f"{exploit.bt_version_min}-{exploit.bt_version_max}",
-                exploit.affected
+                f"{exploit.bt_version_min} - {exploit.bt_version_max}",
+                exploit.profile,
+                symbol
             )
 
         console = Console()
