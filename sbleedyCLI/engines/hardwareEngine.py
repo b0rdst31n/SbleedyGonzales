@@ -56,27 +56,40 @@ class HardwareEngine:
         print("\nChecking for hci devices...")
         try:
             output = subprocess.check_output("hciconfig", shell=True, stderr=subprocess.PIPE).decode().split('\n')[:-1]
-            match = re.search(r"(hci\d+):.*?Bus: (\w+)", " ".join(output))
-            if match:
-                hci_number = match.group(1)
-                bus_type = match.group(2)
-                print(f"{hci_number}: {bus_type}")
-                hardware.port = hci_number
-                
-                try:
-                    print(f"Restarting {hci_number}...")
-                    subprocess.run(['sudo', 'hciconfig', hci_number, 'down'], check=True)
-                    subprocess.run(['sudo', 'hciconfig', hci_number, 'up'], check=True)
-                    print(f"{hci_number} restarted successfully.")
-                except subprocess.CalledProcessError as e:
-                    print(f"Error restarting {hci_number}: {e}")
+            matches = re.findall(r"(hci\d+):.*?Bus: (\w+)", " ".join(output))
+            if not matches:
+                print("No hci devices found.")
+                logging.info('HardwareEngine -> check_setup_hci -> No HCI Bluetooth Adapter found')
+                return False
+            for idx, match in enumerate(matches):
+                print(f"[{idx}] Interface: {match[0]}, Bus: {match[1]}")
+
+            if len(matches) == 1:
+                hardware.port = matches[0][0]
+            else:
+                while True:
+                    try:
+                        hci_choice = int(input(f"\nMultiple HCI devices found. Choose the index of the device to use (0-{len(matches) - 1}): "))
+                        if 0 <= hci_choice < len(matches):
+                            hardware.port = matches[hci_choice][0]
+                            break
+                        else:
+                            print(f"Invalid choice. Please enter a number between 0 and {len(matches) - 1}.")
+                    except ValueError:
+                        print("Invalid input. Please enter a valid number.")
+            
+            try:
+                print(f"Restarting {hardware.port}...")
+                subprocess.run(['sudo', 'hciconfig', hardware.port, 'down'], check=True)
+                subprocess.run(['sudo', 'hciconfig', hardware.port, 'up'], check=True)
+                print(f"{hardware.port} restarted successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error restarting {hardware.port}: {e}")
 
                 return True
-            logging.info('HardwareEngine -> check_setup_hci -> No HCI Bluetooth Adapter found')
         except subprocess.CalledProcessError as e:
             logging.info("HardwareEngine -> check_setup_hci -> Error during checking hci setup")
-        print("No hci devices found.")
-        return False
+            return False
     
     @staticmethod
     def check_setup_nRF(hardware) -> bool:
