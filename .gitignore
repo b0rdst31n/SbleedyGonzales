@@ -3,6 +3,7 @@ __pycache__/
 *.egg-info/
 *.log
 .git-old
+build/
 venv2/
 venv3/
 results/*
