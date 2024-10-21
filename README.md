@@ -2,6 +2,10 @@
 
 SbleedyGonzales is a CLI tool designed to perform various checks and operations on target devices and networks. It supports multiple functionalities such as running exploits, listing available options, checking connectivity, creating reports, and more.
 
+## Installation
+
+Requires Python3.10 (for the main exploit runner) and Python2.7 (for Sweyntooth)
+
 ## Usage
 
 ```bash
@@ -19,9 +23,9 @@ options:
   -ct, --checktarget    Check connectivity and availability of the target
   -ch, --checkpoint     Start from a checkpoint (if one exists for the given target)
   -ex EXPLOITS [EXPLOITS ...], --exclude EXPLOITS [EXPLOITS ...]
-                        Exclude exploits, example --exclude exploit1, exploit2
+                        Exclude exploits (e.g. --exclude exploit1, exploit2 OR --exclude 1,5)
   -e EXPLOITS [EXPLOITS ...], --exploits EXPLOITS [EXPLOITS ...]
-                        Scan only for provided --exploits exploit1, exploit2; --exclude is not taken into account
+                        Scan only for provided (e.g. --exploits exploit1, exploit2 OR --exploits 1-4), --exclude is not taken into account
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device

@@ -4,6 +4,10 @@ import sys
 import argparse
 import logging
 import signal
+import itertools
+import threading
+import time
+import re
 from tqdm import tqdm
 from pathlib import Path
 from rich.table import Table
@@ -14,7 +18,9 @@ from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.setupverificationEngine import SetupVerifierEngine
 from .engines.sbleedyEngine import SbleedyEngine
+from sbleedyCLI.engines.connectionEngine import check_availability
 from .recon import Recon
+from .report import Report
 
 class Sbleedy():
     def __init__(self) -> None:
@@ -24,13 +30,13 @@ class Sbleedy():
         self.exploits_to_scan = []
         self.target = None
         self.parameters = None
-        self.exploitEngine = ExploitEngine(TOOL_DIRECTORY)
-        self.hardwareEngine = HardwareEngine(TOOL_DIRECTORY)
+        self.exploitEngine = ExploitEngine()
+        self.hardwareEngine = HardwareEngine()
         self.engine = SbleedyEngine()
         #self.checkpoint = Checkpoint()
         self.setupverifier = SetupVerifierEngine()
         self.recon = Recon()
-        #self.report = Report()
+        self.report = Report()
     
     def spleedy_signal_handler(self, sig, frame):
         print("Ctrl+C detected. Creating a checkpoint and exiting")
@@ -41,11 +47,45 @@ class Sbleedy():
     def set_parameters(self, parameters: list):
         self.parameters = parameters
 
-    def set_explude_exploits(self, exclude_exploits: list):
-        self.exclude_exploits = exclude_exploits
+    def set_exclude_exploits(self, exclude_exploits: list):
+        only_numbers = all(re.match(r'^[0-9, -]+$', s) for s in exclude_exploits)
+        if only_numbers:
+            self.exclude_exploits = self.get_exploits_by_index(exclude_exploits)
+        else: 
+            self.exclude_exploits = exclude_exploits
     
     def set_exploits(self, exploits_to_scan: list):
-        self.exploits_to_scan = exploits_to_scan
+        only_numbers = all(re.match(r'^[0-9, -]+$', s) for s in exploits_to_scan)
+        if only_numbers:
+            self.exploits_to_scan = self.get_exploits_by_index(exploits_to_scan)
+        else: 
+            self.exploits_to_scan = exploits_to_scan
+    
+    def get_exploits_by_index(self, exploits: list):
+        selected_exploits = []
+        av_exploits = self.get_available_exploits()
+
+        for item in exploits:
+            if ',' in item:
+                indices = item.split(',')
+                for index in indices:
+                    try:
+                        index = int(index)
+                        selected_exploits.append(av_exploits[index - 1].name)
+                    except (ValueError, IndexError):
+                        print(f"Skipping invalid or out-of-range value: {index}")
+
+            elif '-' in item:
+                start, end = map(int, item.split('-'))
+                selected_exploits.extend([exploit.name for exploit in av_exploits[start - 1:end]])
+            else:
+                try:
+                    index = int(item)
+                    selected_exploits.append(av_exploits[index - 1].name)
+                except ValueError:
+                    print(f"Skipping non-numeric value: {item}")
+
+        return selected_exploits
     
     def set_exploits_hardware(self, hardware: list):
         available_exploits = self.get_available_exploits()
@@ -80,14 +120,15 @@ class Sbleedy():
         available_exploits = sorted(available_exploits, key=lambda x: x.hardware)
         available_exploits = sorted(available_exploits, key=lambda x: not hardware_verified[x.hardware])
 
+        print("\n")
         table = Table(title="Available Exploits")
         table.add_column("Index", justify="center", style="cyan", no_wrap=True)
         table.add_column("Exploit", style="magenta")
         table.add_column("Type", style="green")
         table.add_column("Hardware", style="blue")
         table.add_column("Available", justify="center")
-        table.add_column("BT min", justify="center")
-        table.add_column("BT max", justify="center")
+        table.add_column("BT version", justify="center")
+        table.add_column("Affected", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
             symbol = '[red]X[/red]' 
@@ -96,12 +137,12 @@ class Sbleedy():
 
             table.add_row(
                 str(index),
-                exploit.name,
+                ' '.join(word.capitalize() for word in exploit.name.split('_')),
                 exploit.type,
                 exploit.hardware,
                 symbol,
-                str(exploit.bt_version_min),
-                str(exploit.bt_version_max)
+                f"{exploit.bt_version_min}-{exploit.bt_version_max}",
+                exploit.affected
             )
 
         console = Console()
@@ -111,7 +152,7 @@ class Sbleedy():
         cont = True
         while cont:
             for i in range(10):
-                available = self.recon.check_availability(target)
+                available = check_availability(target)
                 if available:
                     return True
             if not available:
@@ -136,6 +177,9 @@ class Sbleedy():
     
     def start_from_cli_all(self, target, parameters) -> None:
         logging.info("start_from_cli_all -> Target: {}".format(target))
+        if not check_availability(target):
+            sys.exit(1)
+
         available_exploits = self.get_available_exploits()
         exploits_with_setup = self.exploit_filter(target=target, exploits=self.get_exploits_with_setup())
 
@@ -153,11 +197,12 @@ class Sbleedy():
         logging.info("start_from_cli_all -> available exploit amount - {}".format(len(exploits)))
         logging.info("start_from_cli_all -> exploits to scan amount - {}".format(len(self.exploits_to_scan)))
 
-        if len(self.exploits_to_scan) > 0:
-            exploits = [exploit for exploit in exploits if exploit.name in self.exploits_to_scan]
-        elif len(self.exclude_exploits) > 0:                                                                # not checked if --exploits is provided
-            exploits = [exploit for exploit in exploits if exploit.name not in self.exclude_exploits]       # suboptimal implementation, but should be fine
-        logging.info("start_from_cli_all -> available exploit again amount - {}".format(len(exploits)))
+        if self.exploits_to_scan:
+            exploits = [exploit for exploit in exploits if exploit.name in set(self.exploits_to_scan)]
+        elif self.exclude_exploits:
+            exploits = [exploit for exploit in exploits if exploit.name not in set(self.exclude_exploits)]
+
+        logging.info(f"start_from_cli_all -> chosen exploit amount - {len(exploits)}")
 
         exploits = [exploit for exploit in exploits if exploit.mass_testing]
 
@@ -173,7 +218,29 @@ class Sbleedy():
         return exploits
     
     def test_exploit(self, target, current_exploit, parameters) -> tuple:
-        return self.engine.run_test(target, current_exploit, parameters)
+        current_port = self.hardwareEngine.get_hardware_port(current_exploit.hardware)
+        print(f"Currently running {current_exploit.name}... ", end="")
+        sys.stdout.flush()
+
+        stop_spinner = False
+        def spinner_task():
+            spinner = self.spinning_cursor()
+            while not stop_spinner:
+                sys.stdout.write(next(spinner))  
+                sys.stdout.flush()
+                time.sleep(0.1)  
+                sys.stdout.write('\b')
+
+        spinner_thread = threading.Thread(target=spinner_task)
+        spinner_thread.start()
+
+        try:
+            result = self.engine.run_test(target, current_port, current_exploit, parameters)
+        finally:
+            stop_spinner = True
+            spinner_thread.join()
+        
+        return result
         
     def test_one_by_one(self, target, parameters, exploits) -> None:
         for i in tqdm(range(0, len(exploits), 1), desc="Testing exploits"):
@@ -181,7 +248,20 @@ class Sbleedy():
             response_code, data = self.test_exploit(target, exploits[i], parameters)
             self.done_exploits.append([exploits[i].name, response_code, data])
             logging.info("Sbleedy.test_one_by_one -> done exploits - " + str(self.done_exploits))
-            #self.report.save_data(exploit_name=exploits[i].name, target=target, data=data, code=response_code)
+            self.report.save_data(exploit_name=exploits[i].name, target=target, data=data, code=response_code)
+    
+    def spinning_cursor(self):
+        spinner = itertools.cycle(['|', '/', '-', '\\'])
+        while True:
+            yield next(spinner)
+    
+    def generate_report(self, target):
+        table = self.report.generate_report(target=target)
+        console = Console()
+        console.print(table)
+    
+    def generate_machine_readable_report(self, target):
+        self.report.generate_machine_readable_report(target=target)
 
 def print_header():
     terminal_width = (os.get_terminal_size().columns)
@@ -216,8 +296,8 @@ def main():
     parser.add_argument('-l','--listexploits', required=False, action='store_true', help="List all exploits yes/no")
     parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check connectivity and availability of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
-    parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits (--exclude exploit1, exploit2)")
-    parser.add_argument('-e', '--exploits', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (--exploits exploit1, exploit2), --exclude is not taken into account")
+    parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits by index or name (--exclude exploit1, exploit2)")
+    parser.add_argument('-e', '--exploits', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (index or name) (--exploits exploit1, exploit2), --exclude is not taken into account")
     parser.add_argument('-r', '--recon', required=False, action='store_true', help="Run a recon script")
     parser.add_argument('-re', '--report', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
@@ -226,6 +306,8 @@ def main():
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
+    with open(LOG_FILE, 'w'):
+        pass
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
     logging.info('Started')
     script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -245,13 +327,26 @@ def main():
         expRunner.check_hardware()
     elif args.target:
         if len(args.hardware) > 0:
-            expRunner.set_exploits_hardware(args.hardware)
-            logging.info("Provided --hardware parameter -> " + str(args.hardware))
+            av_hardware_list = []
+            hardware_found = False
+            for hw in expRunner.get_available_hardware():
+                av_hardware_list.append(hw.name)
+            
+            for provided_hardware in args.hardware: 
+                if provided_hardware in av_hardware_list:
+                    expRunner.set_exploits_hardware(provided_hardware)
+                    logging.info(f"Provided --hardware parameter -> {provided_hardware}")
+                    hardware_found = True
+                    break 
+
+            if not hardware_found:
+                print(f"\nAvailable hardware: {', '.join(av_hardware_list)}")
+                sys.exit(1)
         elif len(args.exploits) > 0:
             expRunner.set_exploits(args.exploits)
             logging.info("Provided --exploit parameter -> " + str(args.exploits))
         elif len(args.exclude) > 0:
-            expRunner.set_explude_exploits(args.exclude)
+            expRunner.set_exclude_exploits(args.exclude)
             logging.info("Provided --exclude parameter -> " + str(args.exclude))
 
         if args.checktarget:
@@ -260,11 +355,9 @@ def main():
             if args.recon:
                 expRunner.run_recon(args.target)
             elif args.report:
-                print("TODO")
-                #expRunner.generate_report(args.target)
+                expRunner.generate_report(args.target)
             elif args.reportjson:
-                print("TODO")
-                #expRunner.generate_machine_readble_report(args.target)
+                expRunner.generate_machine_readable_report(args.target)
             elif args.checkpoint:
                 print("TODO")
                 #expRunner.start_from_a_checkpoint(args.target)
