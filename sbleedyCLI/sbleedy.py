@@ -16,7 +16,6 @@ from rich.console import Console
 from .constants import TOOL_DIRECTORY, LOG_FILE
 from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
-from .engines.setupverificationEngine import SetupVerifierEngine
 from .engines.sbleedyEngine import SbleedyEngine
 from sbleedyCLI.engines.connectionEngine import check_availability
 from .recon import Recon
@@ -34,7 +33,6 @@ class Sbleedy():
         self.hardwareEngine = HardwareEngine()
         self.engine = SbleedyEngine()
         #self.checkpoint = Checkpoint()
-        self.setupverifier = SetupVerifierEngine()
         self.recon = Recon()
         self.report = Report()
     
@@ -100,7 +98,7 @@ class Sbleedy():
     
     def check_hardware(self):
         available_hardware = self.hardwareEngine.get_all_hardware_profiles()
-        hardware_verified = self.setupverifier.verify_setup_multiple_hardware(available_hardware)
+        hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         print("\nHardware availability:")
         for hardware in available_hardware:
             print("{hardware} - status {availability}".format(hardware=hardware.name, availability=hardware_verified[hardware.name]))
@@ -108,13 +106,13 @@ class Sbleedy():
     def get_exploits_with_setup(self):
         available_exploits = self.get_available_exploits()
         available_hardware = self.get_available_hardware()
-        hardware_verified = self.setupverifier.verify_setup_multiple_hardware(available_hardware)
+        hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         return [exploit for exploit in available_exploits if hardware_verified[exploit.hardware]]
 
     def print_available_exploits(self):
         available_exploits = self.get_available_exploits()
         available_hardware = self.get_available_hardware()
-        hardware_verified = self.setupverifier.verify_setup_multiple_hardware(available_hardware)
+        hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         
         available_exploits = sorted(available_exploits, key=lambda x: x.type)
         available_exploits = sorted(available_exploits, key=lambda x: x.hardware)
