@@ -29,7 +29,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 1. **Clone the Repository**:
 
     ```bash
-    git clone https://github.com/b0rdst31n/SbleedyGonzales.git
+    git clone https://github.com/b0rdst31n/SbleedyGonzales.git --recurse-submodules
     cd sbleedy_gonzales
     ```
 
@@ -39,14 +39,14 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
     - Python 3.10:
 
       ```bash
-      virtualenv -p python3.10 venv3
+      python3.10 -m virtualenv -p python3.10 venv3
       source venv3/bin/activate
       ```
 
     - Python 2.7 (for Sweyntooth):
 
       ```bash
-      virtualenv -p python2.7 venv2
+      python2.7 -m virtualenv -p python2.7 venv2
       source venv2/bin/activate
       ```
 

@@ -150,7 +150,7 @@ class Sbleedy():
         available_exploits = self.get_available_exploits()
         exploits_with_setup = self.exploit_filter(target=target, exploits=self.get_exploits_with_setup())
 
-        print("\nThere are {} out of {} exploits available.".format(len(exploits_with_setup), len(available_exploits)))
+        print("There are {} out of {} exploits available.".format(len(exploits_with_setup), len(available_exploits)))
         print("Running the following exploits: {}\n".format([exploit.name for exploit in exploits_with_setup]))
 
         Path(os.path.join(OUTPUT_DIRECTORY.format(target=target))).mkdir(exist_ok=True, parents=True)

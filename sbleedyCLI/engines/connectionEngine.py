@@ -5,6 +5,8 @@ import time
 import os
 import signal
 import sys
+import asyncio
+from bleak import BleakScanner
 
 import sbleedyCLI.constants as const
 
@@ -13,28 +15,17 @@ def dos_checker(target):
         print("No hci device found. DoS check needs one.")
         return const.RETURN_CODE_ERROR, "No hci device"
     try:
-        try:
-            cont = True
-            down_times = 0
-            not_pairable = 0
-            while cont:
-                for i in range(const.NUMBER_OF_DOS_TESTS):
-                    available = check_availability(target)
-                    if available:
-                        break
-                    else:
-                        down_times += 1
+        down_times = 0
+        for i in range(const.NUMBER_OF_DOS_TESTS):
+            available = check_availability(target)
+            if available:
                 break
-        except Exception as e:
-            return const.RETURN_CODE_ERROR, str(e)
+            down_times += 1
+
+        if down_times > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL or down_times == const.NUMBER_OF_DOS_TESTS:
+            return const.RETURN_CODE_VULNERABLE, str(down_times)
         
-        if down_times > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL:
-            if not_pairable > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL:
-                return const.RETURN_CODE_VULNERABLE, str(down_times)
-            elif down_times == const.NUMBER_OF_DOS_TESTS: 
-                return const.RETURN_CODE_VULNERABLE, str(down_times)
-        else:
-            return const.RETURN_CODE_NOT_VULNERABLE, str(down_times)
+        return const.RETURN_CODE_NOT_VULNERABLE, str(down_times)
     except Exception as e:
         return const.RETURN_CODE_ERROR, str(e)
 
@@ -52,20 +43,24 @@ def check_hci_device():
         print(f"Error checking HCI device: {e}")
         return False
 
-def check_availability(target):
+async def check_availability_async(target):
     if not check_hci_device():
         return False
 
-    print("Checking device availability...")
-    process = subprocess.Popen(const.LESCAN.split(), stdout=subprocess.PIPE)
-    time.sleep(10)
-    os.kill(process.pid, signal.SIGINT)
-    output = process.communicate()[0].decode("utf-8")
-    if target in output:
+    print("\nChecking device availability...")
+    try:
+        subprocess.run(['sudo', 'systemctl', 'restart', 'bluetooth'], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to restart Bluetooth service: {e}")
+    devices = await BleakScanner.discover(timeout=10.0)
+    if target in [device.address for device in devices]:
         print("Device is available.")
         return True
     print("Device is not available.")
     return False
+
+def check_availability(target):
+    return asyncio.run(check_availability_async(target))
 
 def check_target(self, target):
     cont = True
