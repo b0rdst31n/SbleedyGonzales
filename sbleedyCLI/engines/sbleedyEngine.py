@@ -85,8 +85,7 @@ class SbleedyEngine:
 
         return response_code, data
         
-    def execute_command(self, target: str, exploit_command: list, exploit_name: str, timeout=const.TIMEOUT, directory=None) -> tuple:
-        pid = None
+    def execute_command(self, target: str, exploit_command: list, exploit_name: str, timeout: int, directory=None) -> tuple:
         os.chdir(directory)
         logging.info("SbleedyEngine.execute_command -> chdir to {}".format(directory))
   

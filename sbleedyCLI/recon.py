@@ -28,14 +28,14 @@ class Recon():
 
     def run_recon(self, target):
         self.enable_logging()
-        log_dir = const.RECON_DIRECTORY
+        log_dir = const.RECON_DIRECTORY.format(target=target)
         Path(log_dir).mkdir(exist_ok=True, parents=True)
         for command, filename in COMMANDS:
             self.run_command(target, command, log_dir + filename)
     
     def determine_bluetooth_version(self, target) -> float:
         self.enable_logging()
-        file_path = Path(const.RECON_DIRECTORY + const.BLUING_BR_LMP[1])
+        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
@@ -43,7 +43,7 @@ class Recon():
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
         else:
-            file_path = Path(const.RECON_DIRECTORY + const.HCITOOL_INFO[1])
+            file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.HCITOOL_INFO[1])
             if file_path.is_file():
                 with file_path.open('r') as f:
                     text = f.read()

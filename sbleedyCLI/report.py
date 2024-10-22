@@ -60,7 +60,7 @@ class Report:
 
     def get_done_exploits(self, target):
         path = Path(const.OUTPUT_DIRECTORY.format(target=target))
-        exploits = [entry.stem for entry in path.iterdir() if entry.is_file() and entry.suffix == '.json' and entry.stem not in const.SKIP_DIRECTORIES]
+        exploits = [entry.stem for entry in path.iterdir() if entry.is_file() and entry.suffix == '.json' and not entry.stem.startswith('.checkpoint') and entry.stem not in const.SKIP_DIRECTORIES]
         logging.info("Extracted following completed exploits: " + str(exploits))
         return exploits
 

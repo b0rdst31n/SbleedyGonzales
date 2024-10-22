@@ -287,7 +287,6 @@ def main():
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
-    print(RESULT_DIRECTORY)
     if not os.path.exists(RESULT_DIRECTORY):
         try:
             os.makedirs(RESULT_DIRECTORY)
