@@ -72,7 +72,8 @@ setup(
     entry_points={
         'console_scripts': [
             'sbleedy = sbleedyCLI.sbleedy:main',
-            'bleagle = modules.BLEagle.bleagle:main'
+            'bleagle = modules.BLEagle.bleagle:main',
+            'blueshark = modules.BlueShark.blueShark:main'
         ],
     },
     install_requires=[
