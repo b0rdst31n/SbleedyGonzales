@@ -53,7 +53,17 @@ class CustomInstallCommand(install):
     def run(self):
         self.run_command('init_submodules') 
         #self.run_command('install_submodule_dependencies') 
+        install_gatt_module()
         install.run(self) 
+
+def install_gatt_module():
+    gatt_folder = os.path.join(os.getcwd(), 'modules/BLEagle/gatt')
+    try:
+        print("Installing Go module from gatt folder...")
+        subprocess.run(['go', 'install'], cwd=gatt_folder, check=True)
+        print("Go module installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while installing Go module: {e}")
 
 setup(
     name='SbleedyGonzales',
@@ -62,6 +72,7 @@ setup(
     entry_points={
         'console_scripts': [
             'sbleedy = sbleedyCLI.sbleedy:main',
+            'bleagle = modules.BLEagle.bleagle:main'
         ],
     },
     install_requires=[
