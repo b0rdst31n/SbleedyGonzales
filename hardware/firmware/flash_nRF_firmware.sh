@@ -11,4 +11,4 @@ echo "The nRF has to be in boot mode. Hold the Reset button for 2 seconds until 
 read REPLY
 
 SCRIPT_DIR=$(dirname "$0")
-nrfutil dfu usb-serial -p "$1" -pkg "$SCRIPT_DIR/sweyntooth_nRF52840_firmware.zip"
+nrfutil dfu usb-serial -p "$1" -pkg "$SCRIPT_DIR/$2"

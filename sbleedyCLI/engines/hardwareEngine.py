@@ -6,7 +6,7 @@ import logging
 import re
 import serial.tools.list_ports
 
-from sbleedyCLI.constants import HARDWARE_DIRECTORY, FIRMWARE_DIRECTORY
+from sbleedyCLI.constants import HARDWARE_DIRECTORY, FLASH_NRF_FILE
 from sbleedyCLI.models.hardware import Hardware
 
 class HardwareEngine:
@@ -77,10 +77,10 @@ class HardwareEngine:
                 selected_firmware = selected_hardware.firmware[choice-1]
                 firmware_name = list(selected_firmware.keys())[0]
                 print(f"Flashing {hw_name} with firmware {firmware_name} on {selected_hardware.port}...\n")
-                script_path = os.path.join(FIRMWARE_DIRECTORY, selected_firmware[firmware_name])
+                script_path = FLASH_NRF_FILE
                 if not os.access(script_path, os.X_OK):
                     os.chmod(script_path, os.stat(script_path).st_mode | stat.S_IEXEC)
-                subprocess.run([script_path, selected_hardware.port], check=True)
+                subprocess.run([script_path, selected_hardware.port, selected_firmware[firmware_name]], check=True)
                 return
             else:
                 print(f"Invalid choice.")
