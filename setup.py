@@ -74,7 +74,8 @@ setup(
         'tqdm',
         'scapy',
         'colorama',
-        'tabulate'
+        'tabulate',
+        'bluepy'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

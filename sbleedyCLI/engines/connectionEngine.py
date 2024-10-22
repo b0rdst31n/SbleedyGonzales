@@ -9,6 +9,9 @@ import sys
 import sbleedyCLI.constants as const
 
 def dos_checker(target):
+    if not check_hci_device():
+        print("No hci device found. DoS check needs one.")
+        return const.RETURN_CODE_ERROR, "No hci device"
     try:
         try:
             cont = True
@@ -24,8 +27,6 @@ def dos_checker(target):
                 break
         except Exception as e:
             return const.RETURN_CODE_ERROR, str(e)
-        
-        # TODO: add check for hci_device, otherwise availability check will always be false
         
         if down_times > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL:
             if not_pairable > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL:
