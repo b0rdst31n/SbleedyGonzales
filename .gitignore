@@ -2,7 +2,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 *.log
-build/
+build/*
 venv2/
 venv3/
 results/*

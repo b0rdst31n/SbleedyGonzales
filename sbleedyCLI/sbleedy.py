@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 
-from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY
+from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY, RESULT_DIRECTORY
 from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.sbleedyEngine import SbleedyEngine
@@ -56,7 +56,7 @@ class Sbleedy():
     def set_exploits(self, exploits_to_scan: list):
         only_numbers = all(re.match(r'^[0-9, -]+$', s) for s in exploits_to_scan)
         if only_numbers:
-            self.exploits_to_scan = self.get_exploits_by_index(exploits_to_scan)
+            self.exploits_to_scan = self.exploitEngine.get_exploits_by_index(exploits_to_scan)
         else: 
             self.exploits_to_scan = exploits_to_scan
     
@@ -287,6 +287,12 @@ def main():
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
+    print(RESULT_DIRECTORY)
+    if not os.path.exists(RESULT_DIRECTORY):
+        try:
+            os.makedirs(RESULT_DIRECTORY)
+        except OSError as e:
+            print(f"Error creating directory {RESULT_DIRECTORY}: {e}")
     with open(LOG_FILE, 'w'):
         pass
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)

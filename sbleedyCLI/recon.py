@@ -10,9 +10,10 @@ from pathlib import Path
 import sbleedyCLI.constants as const
 COMMANDS = [const.HCITOOL_INFO, const.BLUING_BR_SDP, const.BLUING_BR_LMP]
 
-logging.basicConfig(filename=const.LOG_FILE, level=logging.INFO)
-
 class Recon():
+    def enable_logging(self):
+        logging.basicConfig(filename=const.LOG_FILE, level=logging.INFO)
+
     def run_command(self, target, command, filename):
         print("Running command -> {}".format(command))
         try:
@@ -26,13 +27,15 @@ class Recon():
         return False
 
     def run_recon(self, target):
-        log_dir = const.OUTPUT_DIRECTORY.format(target=target) + "recon/"
+        self.enable_logging()
+        log_dir = const.RECON_DIRECTORY
         Path(log_dir).mkdir(exist_ok=True, parents=True)
         for command, filename in COMMANDS:
             self.run_command(target, command, log_dir + filename)
     
     def determine_bluetooth_version(self, target) -> float:
-        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "recon/" + const.BLUING_BR_LMP[1])
+        self.enable_logging()
+        file_path = Path(const.RECON_DIRECTORY + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
@@ -40,7 +43,7 @@ class Recon():
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
         else:
-            file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "recon/" + const.HCITOOL_INFO[1])
+            file_path = Path(const.RECON_DIRECTORY + const.HCITOOL_INFO[1])
             if file_path.is_file():
                 with file_path.open('r') as f:
                     text = f.read()
