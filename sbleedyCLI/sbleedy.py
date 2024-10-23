@@ -116,6 +116,7 @@ class Sbleedy():
         console.print(table)
     
     def check_target(self, target):
+        print("Checking device availability")
         cont = True
         while cont:
             for i in range(10):
@@ -144,11 +145,12 @@ class Sbleedy():
     
     def start_from_cli_all(self, target, parameters) -> None:
         logging.info("start_from_cli_all -> Target: {}".format(target))
-        if not check_availability(target):
-            sys.exit(1)
 
         available_exploits = self.get_available_exploits()
         exploits_with_setup = self.exploit_filter(target=target, exploits=self.get_exploits_with_setup())
+
+        if not check_availability(target):
+            sys.exit(1)
 
         print("There are {} out of {} exploits available.".format(len(exploits_with_setup), len(available_exploits)))
         print("Running the following exploits: {}\n".format([exploit.name for exploit in exploits_with_setup]))
@@ -196,17 +198,19 @@ class Sbleedy():
                 time.sleep(0.1)  
                 sys.stdout.write('\b')
 
-        spinner_thread = threading.Thread(target=spinner_task)
-        spinner_thread.start()
-
+        spinner_thread = None
+        if not self.engine.verbosity:
+            spinner_thread = threading.Thread(target=spinner_task)
+            spinner_thread.start()
         try:
             result = self.engine.run_test(target, current_port, current_exploit, parameters)
         finally:
-            stop_spinner = True
-            spinner_thread.join()
-        
+            if not self.engine.verbosity:
+                stop_spinner = True
+                spinner_thread.join()
+            
         return result
-        
+
     def test_one_by_one(self, target, parameters, exploits) -> None:
         for i in tqdm(range(0, len(exploits), 1), desc="Testing exploits"):
             #self.check_target(target)

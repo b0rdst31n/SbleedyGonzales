@@ -8,6 +8,7 @@ import psutil
 import subprocess
 import signal
 from pathlib import Path
+import select
 
 from sbleedyCLI.models.exploit import Exploit
 from sbleedyCLI.engines.connectionEngine import dos_checker
@@ -88,39 +89,58 @@ class SbleedyEngine:
     def execute_command(self, target: str, exploit_command: list, exploit_name: str, timeout: int, directory=None) -> tuple:
         os.chdir(directory)
         logging.info("SbleedyEngine.execute_command -> chdir to {}".format(directory))
-  
+
         data = False, b''
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit_name, exploit_command))
             with open(os.path.join(const.OUTPUT_DIRECTORY.format(target=target) + "exploit_output.log"), "ab") as f:
                 f.write(f"\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
-                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)         # for some reason doesn't accept tokenized exploit_command (leads to a bug)
-                for c in iter(lambda: process.stdout.read(1), b""):
-                    if self.verbosity:
-                        sys.stdout.buffer.write(c)
-                        f.write(c)
-            
-            logging.info("SbleedyEngine.execute_command -> sleeping for {} seconds".format(timeout))
-                
-            new_xdata = process.wait(timeout=timeout)
-            new_data = process.communicate()
-            logging.info("SbleedyEngine.execute_command -> command.communicate " + str(new_data))
-            if type(new_data) is int:
-                print(new_data)
-            else:
-                new_data = new_data[0]
-            data = True, new_data
+
+                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+
+                start_time = time.time()
+                output = b''
+
+                while True:
+                    if time.time() - start_time > timeout:
+                        raise subprocess.TimeoutExpired(exploit_command, timeout)
+
+                    rlist, _, _ = select.select([process.stdout], [], [], 1)
+
+                    if rlist:
+                        c = process.stdout.read(1) 
+                        if not c:
+                            break  
+
+                        f.write(c) 
+                        f.flush()   
+                        output += c
+
+                        if self.verbosity:
+                            sys.stdout.buffer.write(c) 
+                            sys.stdout.flush() 
+
+                    if process.poll() is not None:
+                        break 
+
+                process.wait()
+                data = True, output
+
         except subprocess.TimeoutExpired as e:
-            logging.info("SbleedyEngine.execute_command -> Killing the exploit and sleeping for another 1 second")
+            logging.info("SbleedyEngine.execute_command -> Killing the exploit due to timeout")
             for child in psutil.Process(process.pid).children(recursive=True):
                 child.kill()
             os.killpg(os.getpgid(process.pid), signal.SIGTERM)
             time.sleep(1)
-        
-        os.chdir(const.TOOL_DIRECTORY)
-        
-        logging.info("SbleedyEngine.execute_command -> data -> " + str(data))
+            data = False, b"Command timed out"
+        except Exception as e:
+            logging.error(f"Error in execute_command: {str(e)}")
+            return False, str(e)
+        finally:
+            os.chdir(const.TOOL_DIRECTORY)
+            logging.info("SbleedyEngine.execute_command -> data -> " + str(data))
+
         return data
     
     def process_raw_data(self, data, if_failed):

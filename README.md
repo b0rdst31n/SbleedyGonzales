@@ -92,7 +92,7 @@ options:
   -chw, --checkhardware Check for connected hardware
   -fh, --flashhardware HARDWARE
                         Flash firmware onto connected hardware (e.g. -fh nRF52840), get hardware names with -chw
-  -v, --verbose         Verbosity on/off (additional output during exploit execution), saved in results/{target}/exploit_output.log
+  -v, --verbose         Verbosity on/off (additional output during exploit execution in terminal), Regardless of this flag the output is always saved in results/{target}/exploit_output.log
 
 EXAMPLES:
 Run sbleedy recon:

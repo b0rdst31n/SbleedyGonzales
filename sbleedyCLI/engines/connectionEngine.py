@@ -5,27 +5,25 @@ import time
 import os
 import signal
 import sys
-import asyncio
-from bleak import BleakScanner
 
 import sbleedyCLI.constants as const
 
 def dos_checker(target):
     if not check_hci_device():
         print("No hci device found. DoS check needs one.")
-        return const.RETURN_CODE_ERROR, "No hci device"
+        return const.RETURN_CODE_ERROR, "No hci device found"
     try:
         down_times = 0
         for i in range(const.NUMBER_OF_DOS_TESTS):
             available = check_availability(target)
             if available:
-                break
+                return const.RETURN_CODE_NOT_VULNERABLE, f"Device not down"
             down_times += 1
 
         if down_times > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL or down_times == const.NUMBER_OF_DOS_TESTS:
-            return const.RETURN_CODE_VULNERABLE, str(down_times)
+            return const.RETURN_CODE_VULNERABLE, f"Device down (tried {down_times} times)"
         
-        return const.RETURN_CODE_NOT_VULNERABLE, str(down_times)
+        return const.RETURN_CODE_NOT_VULNERABLE, f"Device not down (tried {down_times} times)"
     except Exception as e:
         return const.RETURN_CODE_ERROR, str(e)
 
@@ -43,24 +41,17 @@ def check_hci_device():
         print(f"Error checking HCI device: {e}")
         return False
 
-async def check_availability_async(target):
+def check_availability(target):
     if not check_hci_device():
         return False
 
-    print("\nChecking device availability...")
-    try:
-        subprocess.run(['sudo', 'systemctl', 'restart', 'bluetooth'], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to restart Bluetooth service: {e}")
-    devices = await BleakScanner.discover(timeout=10.0)
-    if target in [device.address for device in devices]:
-        print("Device is available.")
+    process = subprocess.Popen(const.LESCAN.split(), stdout=subprocess.PIPE)
+    time.sleep(5)
+    os.kill(process.pid, signal.SIGINT)
+    output = process.communicate()[0].decode("utf-8")
+    if target in output:
         return True
-    print("Device is not available.")
     return False
-
-def check_availability(target):
-    return asyncio.run(check_availability_async(target))
 
 def check_target(self, target):
     cont = True
