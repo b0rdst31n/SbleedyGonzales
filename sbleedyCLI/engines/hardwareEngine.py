@@ -52,8 +52,11 @@ class HardwareEngine:
     
     def flash_hardware(self, hw_name):
         available_hardware = self.get_all_hardware_profiles()
+        if not any(av.name == hw_name for av in available_hardware):
+            print(f"\nHardware {hw_name} not known. Valid names: {', '.join(av.name for av in available_hardware)}")
+            return
+
         hardware_verified = self.verify_setup_multiple_hardware(available_hardware)
-        
         if not hardware_verified[hw_name]:
             print(f"\nHardware {hw_name} not available.")
             return

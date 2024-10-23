@@ -276,7 +276,7 @@ def main():
     parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check connectivity and availability of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
     parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits by index or name (--exclude exploit1, exploit2)")
-    parser.add_argument('-e', '--exploits', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (index or name) (--exploits exploit1, exploit2), --exclude is not taken into account")
+    parser.add_argument('-in', '--include', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (index or name) (--include exploit1, exploit2), --exclude is not taken into account")
     parser.add_argument('-r', '--recon', required=False, action='store_true', help="Run a recon script")
     parser.add_argument('-re', '--report', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
@@ -332,9 +332,9 @@ def main():
             if not hardware_found:
                 print(f"\nAvailable hardware: {', '.join(av_hardware_list)}")
                 sys.exit(1)
-        elif len(args.exploits) > 0:
-            expRunner.set_exploits(args.exploits)
-            logging.info("Provided --exploit parameter -> " + str(args.exploits))
+        elif len(args.include) > 0:
+            expRunner.set_exploits(args.include)
+            logging.info("Provided --exploit parameter -> " + str(args.include))
         elif len(args.exclude) > 0:
             expRunner.set_exclude_exploits(args.exclude)
             logging.info("Provided --exclude parameter -> " + str(args.exclude))

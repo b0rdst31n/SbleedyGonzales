@@ -8,6 +8,7 @@ SbleedyGonzales is a command-line tool designed to run various exploits against 
 - **Custom Exploit Execution**: Easily add new exploits and customize attack parameters.
 - **Detailed Reports**: Generates JSON-based reports for each exploit executed against a target device.
 - **Cross-Platform**: Compatible with Linux-based platforms with Bluetooth support.
+- **Hardware Support**: Easy option to flash the hardware with the necessary firmware.
 
 ## Supported BLE Exploits
 
@@ -34,7 +35,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
     ```
 
 2. **Create and Activate Virtual Environments**:
-    Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.x. You can use `virtualenv` to create them:
+    Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.10. You can use `virtualenv` to create them:
    
     - Python 3.10:
 
@@ -55,7 +56,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 3. **Install Dependencies**:
     Install the required Python packages using pip:
    
-    For Python 3 environment (in `venv3`):
+    For Python 3.10 environment (in `venv3`):
 
     ```bash
     pip install .
@@ -86,7 +87,7 @@ options:
   -ch, --checkpoint     Start from a checkpoint (if one exists for the given target)
   -ex EXPLOITS [EXPLOITS ...], --exclude EXPLOITS [EXPLOITS ...]
                         Exclude exploits (e.g. --exclude exploit1, exploit2 OR --exclude 1,5)
-  -e EXPLOITS [EXPLOITS ...], --exploits EXPLOITS [EXPLOITS ...]
+  -in EXPLOITS [EXPLOITS ...], --include EXPLOITS [EXPLOITS ...]
                         Scan only for provided (e.g. --exploits exploit1, exploit2 OR --exploits 1-4), --exclude is not taken into account
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device

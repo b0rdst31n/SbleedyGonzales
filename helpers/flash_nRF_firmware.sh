@@ -10,5 +10,5 @@ echo "ATTENTION: if you're working within a VM like VirtualBox, the nRF will be 
 echo "The nRF has to be in boot mode. Hold the Reset button for 2 seconds until the red LED flashes. Press Enter to continue..."
 read REPLY
 
-SCRIPT_DIR=$(dirname "$0")
-nrfutil dfu usb-serial -p "$1" -pkg "$SCRIPT_DIR/$2"
+FIRMWARE_DIR="$(dirname "$0")/../hardware/firmware"
+nrfutil dfu usb-serial -p "$1" -pkg "$FIRMWARE_DIR/$2"
