@@ -21,7 +21,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 
 ### Prerequisites
 
-- **Python**: Python 2.7 (for certain exploits) and Python 3.x (for the CLI tool)
+- **Python**: Python 2.7 (for certain exploits) and Python 3.10 (for the CLI tool). Other Python 3.x versions should work for the CLI tool, but nrfutil (for flashing the firmware) doesn't work with python versions such as 3.12.
 - **Pip**: Ensure pip is installed for both Python versions
 - **BLE Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
 
@@ -34,44 +34,39 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
     cd sbleedy_gonzales
     ```
 
-2. **Create and Activate Virtual Environments**:
-    Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.10. You can use `virtualenv` to create them:
-   
-    - Python 3.10:
+2. **Create Virtual Environments and Install Dependencies**:
+    Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.10.
+    You can run the shell script helpers/venv_installer.sh to get both python versions and their corresponding virtualenv versions, create a venv3 and venv2 and install the necessary requirements in both venvs.
 
       ```bash
-      python3.10 -m virtualenv -p python3.10 venv3
-      source venv3/bin/activate
+      ./helpers/venv_installer.sh
       ```
 
-    - Python 2.7 (for Sweyntooth):
+      If you choose a different name for the Python 2.7 venv please adapt the VENV2_PATH in sbleedyCLI/constants.py.
+
+      If you don't want to use the shell script and created the virtual environments, don't forget to install the required Python packages:
+
+      For Python 3.10 environment (in `venv3`):
 
       ```bash
-      python2.7 -m virtualenv -p python2.7 venv2
-      source venv2/bin/activate
+      pip install .
       ```
 
-      If you choose a different name for this virtualenv, please adapt the VENV2_PATH in sbleedyCLI/constants.py.
+      For Python 2.7 (in `venv2`):
 
-3. **Install Dependencies**:
-    Install the required Python packages using pip:
+      ```bash
+      cd modules/sweyntooth
+      pip install -r requirements.txt
+      ```
+
+2. **Check Installation**:
+   If everything worked, you should now be able to activate the venv3 and run sbleedy.
    
-    For Python 3.10 environment (in `venv3`):
+   ```bash
+   source venv3/bin/activate
+   sbleedy -h #should print usage info
+   ```
 
-    ```bash
-    pip install .
-    ```
-
-    For Python 2.7 (in `venv2`):
-
-    ```bash
-    cd modules/sweyntooth
-    pip install -r requirements.txt
-    ```
-
-## Installation
-
-Requires Python3.10 (for the main exploit runner) and Python2.7 (for Sweyntooth)
 
 ## Usage
 
