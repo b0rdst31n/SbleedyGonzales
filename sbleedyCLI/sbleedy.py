@@ -142,6 +142,7 @@ class Sbleedy():
         self.recon.run_recon(target)
         v = self.recon.determine_bluetooth_version(target)
         print(f"Bluetooth Version of target device: {v}")
+        print(f"BT Profile: {self.recon.check_bt_profile(target)}")
     
     def start_from_cli_all(self, target, parameters) -> None:
         logging.info("start_from_cli_all -> Target: {}".format(target))
@@ -183,7 +184,16 @@ class Sbleedy():
             print(f"Skipping all exploits that do not apply to the Bluetooth version of the target: {version}")
             logging.info(f"Target Bluetooth version: {version}. Skipping all exploits that do not apply to this version.")
             exploits = [exploit for exploit in exploits if float(exploit.bt_version_min) <= float(version) and float(version) <= float(exploit.bt_version_max)]
-            logging.info("There are {} exploits to work on".format(len(exploits)) )
+            logging.info("There are {} exploits to work on".format(len(exploits)))
+        
+        bt_profile = self.recon.check_bt_profile(target)
+        cleaned_bt_profile = re.sub(r'\s*\(.*?\)', '', bt_profile).strip()
+        profile_list = [profile.strip() for profile in cleaned_bt_profile.split('+')]
+        if bt_profile is not None:
+            print(f"Skipping all exploits that do not apply to the Bluetooth profile of the target: {bt_profile}")
+            logging.info(f"Target Bluetooth profile: {bt_profile}. Skipping all exploits that do not apply to this profile.")
+            exploits = [exploit for exploit in exploits if exploit.profile in profile_list]
+            logging.info("There are {} exploits to work on".format(len(exploits)))
 
         return exploits
     
@@ -280,7 +290,7 @@ def main():
     parser = argparse.ArgumentParser(description="SbleedyGonzales CLI tool")
     parser.add_argument('-t','--target', required=False, type=str, help="target MAC address")
     parser.add_argument('-l','--listexploits', required=False, action='store_true', help="List all exploits yes/no")
-    parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check connectivity and availability of the target")
+    parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check availability and get basic info of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
     parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits by index or name (--exclude exploit1, exploit2)")
     parser.add_argument('-in', '--include', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (index or name) (--include exploit1, exploit2), --exclude is not taken into account")
@@ -350,6 +360,8 @@ def main():
         if args.checktarget:
             if expRunner.check_target(args.target):
                 print("The device is available.")
+            print(f"Bluetooth Version of target device: {expRunner.recon.determine_bluetooth_version(args.target)}")
+            print(f"BT Profile: {expRunner.recon.check_bt_profile(args.target)}")
         else:
             if args.recon:
                 expRunner.run_recon(args.target)

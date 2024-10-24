@@ -57,5 +57,45 @@ class Recon():
                         print("Error during retrieving a version")
         return None 
 
+    def check_bt_profile(self, target) -> str:
+        try:
+            result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
+            if result.returncode != 0:
+                return f"Error: {result.stderr.strip()}"
+            
+            output = result.stdout
 
+            br_edr_supported = None
+            le_supported = None
+            simultaneous_le_br_edr = None
+
+            if "BR/EDR Not Supported:" in output:
+                if "BR/EDR Not Supported: False" in output:
+                    br_edr_supported = True
+                elif "BR/EDR Not Supported: True" in output:
+                    br_edr_supported = False
+
+            if "LE Supported (Controller):" in output:
+                if "LE Supported (Controller): True" in output:
+                    le_supported = True
+                elif "LE Supported (Controller): False" in output:
+                    le_supported = False
+
+            if "Simultaneous LE and BR/EDR to Same Device Capable (Controller):" in output:
+                if "Simultaneous LE and BR/EDR to Same Device Capable (Controller): True" in output:
+                    simultaneous_le_br_edr = True
+                elif "Simultaneous LE and BR/EDR to Same Device Capable (Controller): False" in output:
+                    simultaneous_le_br_edr = False
+
+            if br_edr_supported is True and le_supported is True and simultaneous_le_br_edr is True:
+                return "BR/EDR + LE (Dual)"
+            elif br_edr_supported is True:
+                return "BR/EDR (Classic)"
+            elif le_supported is True:
+                return "LE (Low Energy)"
+            else:
+                return "Unknown or unsupported profile"
+
+        except Exception as e:
+            return f"Error: {str(e)}"
