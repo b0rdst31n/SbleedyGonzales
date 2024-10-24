@@ -102,7 +102,7 @@ class Report:
             elif code == const.RETURN_CODE_NOT_VULNERABLE:
                 table.add_row(str(index), f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION])
             elif code == const.RETURN_CODE_ERROR:
-                table.add_row(str(index), f"[cyan]{exploit}[/cyan]", f"[cyan]Error {symbol}[/cyan]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION])
             elif code == const.RETURN_CODE_UNDEFINED:
                 table.add_row(str(index), f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION])
             elif code == const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED:

@@ -13,7 +13,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 
-from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY, RESULT_DIRECTORY
+from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY, RESULT_DIRECTORY, EXPLOIT_LOG_FILE
 from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.sbleedyEngine import SbleedyEngine
@@ -116,7 +116,7 @@ class Sbleedy():
         console.print(table)
     
     def check_target(self, target):
-        print("Checking device availability")
+        print("\nChecking device availability...")
         cont = True
         while cont:
             for i in range(10):
@@ -157,9 +157,12 @@ class Sbleedy():
 
         Path(os.path.join(OUTPUT_DIRECTORY.format(target=target))).mkdir(exist_ok=True, parents=True)
 
+        try:
+            os.remove(EXPLOIT_LOG_FILE.format(target=target))
+        except OSError:
+            pass
         exploit_pool = exploits_with_setup
         self.parameters = parameters
-        self.target = target
         self.test_one_by_one(target, self.parameters, exploit_pool)
     
     def exploit_filter(self, target, exploits) -> list:
@@ -320,6 +323,7 @@ def main():
     elif args.flashhardware:
         expRunner.hardwareEngine.flash_hardware(args.flashhardware)
     elif args.target:
+        expRunner.target = args.target
         if len(args.hardware) > 0:
             av_hardware_list = []
             hardware_found = False
@@ -344,7 +348,8 @@ def main():
             logging.info("Provided --exclude parameter -> " + str(args.exclude))
 
         if args.checktarget:
-            expRunner.check_target(args.target)
+            if expRunner.check_target(args.target):
+                print("The device is available.")
         else:
             if args.recon:
                 expRunner.run_recon(args.target)

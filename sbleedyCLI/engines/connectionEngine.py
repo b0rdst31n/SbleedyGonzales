@@ -9,6 +9,7 @@ import sys
 import sbleedyCLI.constants as const
 
 def dos_checker(target):
+    print("\nRunning a DoS check...")
     if not check_hci_device():
         print("No hci device found. DoS check needs one.")
         return const.RETURN_CODE_ERROR, "No hci device found"
@@ -28,7 +29,6 @@ def dos_checker(target):
         return const.RETURN_CODE_ERROR, str(e)
 
 def check_hci_device():
-    """Check if an HCI device is available."""
     try:
         process = subprocess.Popen(['hciconfig'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, _ = process.communicate()

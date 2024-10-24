@@ -94,10 +94,10 @@ class SbleedyEngine:
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit_name, exploit_command))
-            with open(os.path.join(const.OUTPUT_DIRECTORY.format(target=target) + "exploit_output.log"), "ab") as f:
-                f.write(f"\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
+            with open(const.EXPLOIT_LOG_FILE.format(target=target), "ab") as f:
+                f.write(f"\n\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
 
-                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid, universal_newlines=False)
 
                 start_time = time.time()
                 output = b''
