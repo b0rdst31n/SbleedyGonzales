@@ -130,9 +130,9 @@ if [ -d "$VENV_DIR/venv2" ]; then
     echo "Activating venv2..."
     source "$VENV_DIR/venv2/bin/activate"
     echo "Changing directory to modules/sweyntooth..."
-    cd "$VENV_DIR/modules/sweyntooth" || exit
-    echo "Installing dependencies from requirements.txt in venv2..."
-    pip install -r requirements.txt
+    cd "$VENV_DIR/modules/sweyntooth"
+    echo "Installing sweyntooth in venv2..."
+    sudo ./install_sweyntooth.sh
     deactivate
     echo "Dependencies installed in venv2."
 fi

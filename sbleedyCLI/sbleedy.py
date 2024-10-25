@@ -95,11 +95,16 @@ class Sbleedy():
         table.add_column("BT Profile", justify="center")
         table.add_column("Affected", justify="center")
         table.add_column("Available", justify="center")
+        table.add_column("Automated", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
-            symbol = '[red]X[/red]' 
+            symbol_hardware = '[red]X[/red]' 
+            symbol_automated = '[red]X[/red]' 
             if hardware_verified[exploit.hardware]:
-                symbol = '[green]✓[/green]'  
+                symbol_hardware = '[green]✓[/green]'  
+            if exploit.mass_testing:
+                print(exploit.mass_testing)
+                symbol_automated = '[green]✓[/green]'  
 
             table.add_row(
                 str(index),
@@ -109,7 +114,8 @@ class Sbleedy():
                 f"{exploit.bt_version_min}-{exploit.bt_version_max}",
                 exploit.profile,
                 exploit.affected,
-                symbol
+                symbol_hardware,
+                symbol_automated
             )
 
         console = Console()
@@ -124,7 +130,7 @@ class Sbleedy():
                 if available:
                     return True
             if not available:
-                inp = self.connection_lost()
+                self.connection_lost()
     
     def connection_lost(self) -> None:
         command = input("The target device is not available. Try restoring the connectivity. After that enter 1 of the following commands: continue, backup:\n")
@@ -136,7 +142,7 @@ class Sbleedy():
             raise SystemExit
         else:
             print("Invalid input")
-            connection_lost(self)
+            self.connection_lost()
     
     def run_recon(self, target):
         self.recon.run_recon(target)

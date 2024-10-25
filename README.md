@@ -38,10 +38,10 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 
 2. **Create Virtual Environments and Install Dependencies**:
     Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.10.
-    You can run the shell script helpers/venv_installer.sh to get both python versions and their corresponding virtualenv versions, create a venv3 and venv2 and install the necessary requirements in both venvs.
+    You can run the shell script helpers/sbleedy_installer.sh to get both python versions and their corresponding virtualenv versions, create a venv3 and venv2 and install the necessary requirements in both venvs.
 
       ```bash
-      ./helpers/venv_installer.sh
+      ./helpers/sbleedy_installer.sh
       ```
 
       If you choose a different name for the Python 2.7 venv please adapt the VENV2_PATH in sbleedyCLI/constants.py.

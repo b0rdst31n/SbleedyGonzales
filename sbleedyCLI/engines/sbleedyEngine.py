@@ -40,8 +40,6 @@ class SbleedyEngine:
                 compile_process = subprocess.run(compile_command, check=True)
                 if compile_process.returncode != 0:
                     logging.error(f"Error during gcc compilation for file {poc_file}")
-                else:
-                    os.chmod(poc_file, os.stat(poc_file).st_mode | stat.S_IEXEC)
         
         for param in current_exploit.parameters:
             if param['name'] in parameters_list:
@@ -108,47 +106,36 @@ class SbleedyEngine:
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit_name, exploit_command))
-            with open(const.EXPLOIT_LOG_FILE.format(target=target), "ab") as f:
-                f.write(f"\n\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
+            with open(const.EXPLOIT_LOG_FILE.format(target=target), "w") as f:
+                f.write(f"\n\nEXPLOIT: {exploit_name}\n")
 
-                #TODO: are bins executed? Handle -v flag?
-                process = subprocess.Popen(exploit_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid, universal_newlines=False)
-
+                process = subprocess.Popen(exploit_command, stdout=subprocess.PIPE, text=True)
                 start_time = time.time()
-                output = b''
+                output_bytes = b''
 
                 while True:
                     if time.time() - start_time > timeout:
                         raise subprocess.TimeoutExpired(exploit_command, timeout)
-
-                    rlist, _, _ = select.select([process.stdout], [], [], 1)
-
-                    if rlist:
-                        c = process.stdout.read(1) 
-                        if not c:
-                            break  
-
-                        f.write(c) 
-                        f.flush()   
-                        output += c
-
+                    output = process.stdout.readline()
+                    if output == '' and process.poll() is not None:
+                        break
+                    if output:
+                        output_bytes += output.strip().encode()
+                        f.write(output.strip() +  "\n")
+                        f.flush()
                         if self.verbosity:
-                            sys.stdout.buffer.write(c) 
-                            sys.stdout.flush() 
-
-                    if process.poll() is not None:
-                        break 
-
+                            print(output.strip())
+                
                 process.wait()
-                data = True, output
-
+                data = True, output_bytes
         except subprocess.TimeoutExpired as e:
             logging.info("SbleedyEngine.execute_command -> Killing the exploit due to timeout")
-            for child in psutil.Process(process.pid).children(recursive=True):
-                child.kill()
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+            if self.verbosity:
+                print("[i] Timeout reached\n")
+            process.terminate()
+            process.kill()
             time.sleep(1)
-            data = False, b"Command timed out"
+            data = True, b"Timeout reached"
         except Exception as e:
             logging.error(f"Error in execute_command: {str(e)}")
             return False, str(e)

