@@ -20,14 +20,28 @@ class SbleedyEngine:
         self.logger.setLevel(logging.DEBUG)
         self.verbosity = False
 
-    def construct_exploit_command(self, target: str, port: str, current_exploit: Exploit, parameters: list) -> str:
+    def construct_exploit_command(self, target: str, port: str, current_exploit: Exploit, parameters: list, directory: str) -> str:
         exploit_command = current_exploit.command.split(' ')
         
-        parameters_dict = self.process_additional_paramters(parameters)
+        parameters_dict = self.process_additional_parameters(parameters)
         parameters_list = self.get_parameters_list(parameters)
 
-        if current_exploit.python_version and current_exploit.python_version != 3:
-            exploit_command = [os.path.join(const.VENV2_PATH, "python")] + exploit_command
+        if current_exploit.python_version:
+            if current_exploit.python_version == 2.7:
+                exploit_command = [os.path.join(const.VENV2_PATH, "python")] + exploit_command
+            else:
+                exploit_command.insert(0, "python")
+        else:
+            exploit_command.insert(0, "sudo")
+            os.chdir(directory)
+            poc_file = current_exploit.command.lstrip("./")
+            if not os.path.isfile(poc_file):
+                compile_command = ["gcc", "-o", poc_file, poc_file + ".c", "-lbluetooth"]
+                compile_process = subprocess.run(compile_command, check=True)
+                if compile_process.returncode != 0:
+                    logging.error(f"Error during gcc compilation for file {poc_file}")
+                else:
+                    os.chmod(poc_file, os.stat(poc_file).st_mode | stat.S_IEXEC)
         
         for param in current_exploit.parameters:
             if param['name'] in parameters_list:
@@ -71,10 +85,10 @@ class SbleedyEngine:
         return exploit_command
         
     def run_test(self, target: str, port: str, current_exploit: Exploit, parameters: list) -> None:
-        exploit_command = self.construct_exploit_command(target, port, current_exploit, parameters)
-
         new_directory = const.EXPLOIT_TOOL_DIRECTORY
         new_directory += current_exploit.directory
+
+        exploit_command = self.construct_exploit_command(target, port, current_exploit, parameters, new_directory)
 
         if_failed, data = self.execute_command(target, exploit_command, current_exploit.name, timeout=current_exploit.max_timeout, directory=new_directory)
 
@@ -97,7 +111,8 @@ class SbleedyEngine:
             with open(const.EXPLOIT_LOG_FILE.format(target=target), "ab") as f:
                 f.write(f"\n\nEXPLOIT: {exploit_name}\n".encode('utf-8'))
 
-                process = subprocess.Popen(' '.join(exploit_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, preexec_fn=os.setsid, universal_newlines=False)
+                #TODO: are bins executed? Handle -v flag?
+                process = subprocess.Popen(exploit_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid, universal_newlines=False)
 
                 start_time = time.time()
                 output = b''
@@ -144,7 +159,7 @@ class SbleedyEngine:
         return data
     
     def process_raw_data(self, data, if_failed):
-        # TODO: INEFFICIENTLY processes data line by line (there is room for improvement)
+        #TODO: INEFFICIENTLY processes data line by line (there is room for improvement)
         try:
             mm = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA)
             output = mm.search(data).group()
@@ -164,7 +179,7 @@ class SbleedyEngine:
             logging.info("SbleedyEngine.process_raw_data -> Error during extracting information from the regex " + str(e))
             return const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED, "Error during extracting information from the regex"
         
-    def process_additional_paramters(self, parameters: list) -> dict:
+    def process_additional_parameters(self, parameters: list) -> dict:
         logging.info("SbleedyEngine.process_additional_parameters -> list parameters " + str(parameters))
         param_dict = {}
         for i in range(0, len(parameters), 2):
