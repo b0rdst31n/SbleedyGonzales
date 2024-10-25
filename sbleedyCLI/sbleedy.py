@@ -28,6 +28,7 @@ class Sbleedy():
         self.done_exploits = []
         self.exclude_exploits = []
         self.exploits_to_scan = []
+        self.only_automated = False
         self.target = None
         self.parameters = None
         self.exploitEngine = ExploitEngine()
@@ -103,7 +104,6 @@ class Sbleedy():
             if all(hardware_verified[hw.strip()] for hw in exploit.hardware.split(',')):
                 symbol_hardware = '[green]✓[/green]'  
             if exploit.mass_testing:
-                print(exploit.mass_testing)
                 symbol_automated = '[green]✓[/green]'  
 
             table.add_row(
@@ -182,7 +182,11 @@ class Sbleedy():
             exploits = [exploit for exploit in exploits if exploit.name not in set(self.exclude_exploits)]
         logging.info(f"start_from_cli_all -> chosen exploit amount - {len(exploits)}")
 
-        #exploits = [exploit for exploit in exploits if exploit.mass_testing]
+        if self.only_automated:
+            print("Skipping all exploits that require user handling while executing.")
+            logging.info("Skipping all exploits that require user handling while executing.")
+            exploits = [exploit for exploit in exploits if exploit.mass_testing]
+            logging.info("There are {} exploits to work on".format(len(exploits)))
 
         version = self.recon.determine_bluetooth_version(target)
         if version is not None:
@@ -309,6 +313,7 @@ def main():
     parser.add_argument('-chw','--checkhardware', required=False, action='store_true',  help="Check for connected hardware")
     parser.add_argument('-fh','--flashhardware', required=False, type=str,  help="Flash connected hardware")
     parser.add_argument('-v','--verbose',  required=False, action='store_true', help="Additional output during exploit execution")
+    parser.add_argument('-a','--auto',  required=False, action='store_true', help="Run only automated scripts (that require no user input)")
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
@@ -342,6 +347,8 @@ def main():
         expRunner.hardwareEngine.flash_hardware(args.flashhardware)
     elif args.target:
         expRunner.target = args.target
+        if args.auto:
+            expRunner.only_automated = True
         if len(args.hardware) > 0:
             av_hardware_list = []
             hardware_found = False
