@@ -14,7 +14,9 @@ SbleedyGonzales is a command-line tool designed to run various exploits against 
 
 Sbleedy Gonzales includes various BLE-related exploits, such as:
 
-- **[Sweyntooth](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks)**: A suite of exploits targeting BLE vulnerabilities like L2CAP length overflow, truncated L2CAP, and more.
+- **[Sweyntooth](https://asset-group.github.io/disclosures/sweyntooth/)**: A suite of exploits targeting BLE vulnerabilities like L2CAP length overflow, truncated L2CAP, and more, leading to Crashes, Deadlocks and Security Bypasses.
+- **[KNOB BLE](https://knobattack.com/)**: A security vulnerability that allows attackers to interfere with the pairing process by reducing the entropy of the encryption key, making it easier to perform brute-force attacks and potentially gain unauthorized access.
+- **[BleedingTooth](https://google.github.io/security-research/pocs/linux/bleedingtooth/writeup.html)**: Set of zero-click vulnerabilities in the Linux Bluetooth subsystem that can allow an unauthenticated remote attacker in short distance to execute arbitrary code with kernel privileges on vulnerable devices.
 - **More to come**
 
 ## Installation
@@ -31,7 +33,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 
     ```bash
     git clone https://github.com/b0rdst31n/SbleedyGonzales.git --recurse-submodules
-    cd sbleedy_gonzales
+    cd SbleedyGonzales
     ```
 
 2. **Create Virtual Environments and Install Dependencies**:

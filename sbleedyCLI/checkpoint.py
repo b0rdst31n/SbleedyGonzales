@@ -2,7 +2,7 @@
 import json
 import logging
 from pathlib import Path
-from sbleedyCLI.constants import CHECKPOINT_PATH
+from sbleedyCLI.constants import CHECKPOINT_PATH, OUTPUT_DIRECTORY
 from sbleedyCLI.engines.exploitEngine import ExploitEngine
 
 class Checkpoint:
@@ -23,6 +23,7 @@ class Checkpoint:
             "exclude_exploits": exclude_exploits
         }
         logging.info("Checkpoint - preserve_state -> document -> " + str(doc))
+        Path(OUTPUT_DIRECTORY.format(target=target)).mkdir(exist_ok=True, parents=True) #TODO
         checkpoint = open(CHECKPOINT_PATH.format(target=target), 'w')
         json.dump(doc, checkpoint, indent=6)
         checkpoint.close()

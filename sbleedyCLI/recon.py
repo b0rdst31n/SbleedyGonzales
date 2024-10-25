@@ -43,59 +43,59 @@ class Recon():
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
         else:
-            file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.HCITOOL_INFO[1])
-            if file_path.is_file():
-                with file_path.open('r') as f:
-                    text = f.read()
-                    mm = re.compile(const.REGEX_BT_VERSION_HCITOOL)
-                    output = mm.search(text).group()
-                    version = output.split('(')[1].split(')')[0]
-                    try:
-                        num_version = const.VERSION_TABLE[version]
-                        return num_version
-                    except Exception as e:
-                        print("Error during retrieving a version")
+            print("Please note: when running the recon script once for the target, the version and profile checks will be much faster.")
+            try:
+                result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode != 0:
+                    return f"Error: {result.stderr.strip()}"
+                mm = re.compile(const.REGEX_BT_VERSION)
+                output = mm.search(result.stdout).group()
+                return float(output.split(" ")[3])
+            except Exception as e:
+                return f"Error: {str(e)}"
         return None 
 
     def check_bt_profile(self, target) -> str:
-        try:
-            result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
+        if file_path.is_file():
+            with file_path.open('r') as f:
+                output = f.read()
+        else:       
+            try:
+                result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode != 0:
+                    return f"Error: {result.stderr.strip()}"
+                output = result.stdout
+            except Exception as e:
+                return f"Error: {str(e)}"
 
-            if result.returncode != 0:
-                return f"Error: {result.stderr.strip()}"
-            
-            output = result.stdout
+        br_edr_supported = None
+        le_supported = None
+        simultaneous_le_br_edr = None
 
-            br_edr_supported = None
-            le_supported = None
-            simultaneous_le_br_edr = None
+        if "BR/EDR Not Supported:" in output:
+            if "BR/EDR Not Supported: False" in output:
+                br_edr_supported = True
+            elif "BR/EDR Not Supported: True" in output:
+                br_edr_supported = False
 
-            if "BR/EDR Not Supported:" in output:
-                if "BR/EDR Not Supported: False" in output:
-                    br_edr_supported = True
-                elif "BR/EDR Not Supported: True" in output:
-                    br_edr_supported = False
+        if "LE Supported (Controller):" in output:
+            if "LE Supported (Controller): True" in output:
+                le_supported = True
+            elif "LE Supported (Controller): False" in output:
+                le_supported = False
 
-            if "LE Supported (Controller):" in output:
-                if "LE Supported (Controller): True" in output:
-                    le_supported = True
-                elif "LE Supported (Controller): False" in output:
-                    le_supported = False
+        if "Simultaneous LE and BR/EDR to Same Device Capable (Controller):" in output:
+            if "Simultaneous LE and BR/EDR to Same Device Capable (Controller): True" in output:
+                simultaneous_le_br_edr = True
+            elif "Simultaneous LE and BR/EDR to Same Device Capable (Controller): False" in output:
+                simultaneous_le_br_edr = False
 
-            if "Simultaneous LE and BR/EDR to Same Device Capable (Controller):" in output:
-                if "Simultaneous LE and BR/EDR to Same Device Capable (Controller): True" in output:
-                    simultaneous_le_br_edr = True
-                elif "Simultaneous LE and BR/EDR to Same Device Capable (Controller): False" in output:
-                    simultaneous_le_br_edr = False
-
-            if br_edr_supported is True and le_supported is True and simultaneous_le_br_edr is True:
-                return "BR/EDR + LE (Dual)"
-            elif br_edr_supported is True:
-                return "BR/EDR (Classic)"
-            elif le_supported is True:
-                return "LE (Low Energy)"
-            else:
-                return "Unknown or unsupported profile"
-
-        except Exception as e:
-            return f"Error: {str(e)}"
+        if br_edr_supported is True and le_supported is True and simultaneous_le_br_edr is True:
+            return "BR/EDR + LE (Dual)"
+        elif br_edr_supported is True:
+            return "BR/EDR (Classic)"
+        elif le_supported is True:
+            return "LE (Low Energy)"
+        else:
+            return "Unknown or unsupported profile"

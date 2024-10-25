@@ -45,12 +45,12 @@ def check_availability(target):
     if not check_hci_device():
         return False
 
-    process = subprocess.Popen(const.LESCAN.split(), stdout=subprocess.PIPE)
-    time.sleep(5)
-    os.kill(process.pid, signal.SIGINT)
-    output = process.communicate()[0].decode("utf-8")
-    if target in output:
+    subprocess.run(["sudo", "service", "bluetooth", "restart"], check=True)
+    subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
+    process = subprocess.run(const.BLUETOOTHCTL_SCAN.split(), stdout= subprocess.PIPE, universal_newlines=True)
+    if target in process.stdout:
         return True
+
     return False
 
 def check_target(self, target):

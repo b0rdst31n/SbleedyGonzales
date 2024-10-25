@@ -27,7 +27,7 @@ RETURN_CODE_UNDEFINED = 3
 RETURN_CODE_NONE_OF_4_STATE_OBSERVED = 4
 RETURN_CODE_NOT_TESTED = 5
 
-LESCAN = "sudo hcitool lescan"
+BLUETOOTHCTL_SCAN = 'bluetoothctl --timeout 10 scan on'
 HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
 BLUING_BR_SDP = ("sudo bluing br --sdp {target}", "bluing_sdp.log")
 BLUING_BR_LMP = ("sudo bluing br --lmp-features {target}", "bluing_lmp.log")
@@ -39,20 +39,3 @@ REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY_GONZALES DATA:.*\n"
 REGEX_EXPLOIT_OUTPUT_DATA_CODE = b" code=[0-4],"
 REGEX_EXPLOIT_OUTPUT_DATA_DATA = b", data=.*"
 MAX_CHARS_DATA_TRUNCATION = 80
-
-VERSION_TABLE = {
-    "0x0":1.0,
-    "0x1":1.1,
-    "0x2":1.2,
-    "0x3":2.0,
-    "0x4":2.1,
-    "0x5":3.0,
-    "0x6":4.0,
-    "0x7":4.1,
-    "0x8":4.2,
-    "0x9":5.0,
-    "0xa":5.1,
-    "0xb":5.2,
-    "0xc":5.3,
-    "0xd":5.4
-}

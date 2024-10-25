@@ -358,10 +358,13 @@ def main():
             logging.info("Provided --exclude parameter -> " + str(args.exclude))
 
         if args.checktarget:
-            if expRunner.check_target(args.target):
+            print("\nChecking device availability, Bluetooth version and profile...")
+            if check_availability(args.target):
                 print("The device is available.")
-            print(f"Bluetooth Version of target device: {expRunner.recon.determine_bluetooth_version(args.target)}")
-            print(f"BT Profile: {expRunner.recon.check_bt_profile(args.target)}")
+                print(f"Bluetooth Version of target device: {expRunner.recon.determine_bluetooth_version(args.target)}")
+                print(f"BT Profile: {expRunner.recon.check_bt_profile(args.target)}")
+            else:
+                print("The device is not available.")
         else:
             if args.recon:
                 expRunner.run_recon(args.target)
