@@ -87,14 +87,14 @@ fi
 # Install pip for Python 3.10 and Python 2.7 if they are installed
 if command -v python3.10 &> /dev/null; then
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-    sudo python3.10 get-pip.py
-    sudo python3.10 -m pip install virtualenv
+    python3.10 get-pip.py
+    python3.10 -m pip install virtualenv
 fi
 
 if command -v python2.7 &> /dev/null; then
     curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-    sudo python2.7 get-pip.py
-    sudo python2.7 -m pip install virtualenv
+    python2.7 get-pip.py
+    python2.7 -m pip install virtualenv
 fi
 
 # Ask user for confirmation to create virtual environments
@@ -107,6 +107,7 @@ if confirm "Would you like to create virtual environments (venv3 for Python 3.10
 
     # Create virtual environment venv2 with Python 2.7 in the current directory
     if command -v python2.7 &> /dev/null; then
+        python2.7 -m pip install setuptools
         python2.7 -m virtualenv -p python2.7 "$VENV_DIR/venv2"
         echo "Created virtual environment venv2 with Python 2.7 at $VENV_DIR."
     fi

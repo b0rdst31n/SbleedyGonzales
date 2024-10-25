@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 TOOL_DIRECTORY = os.getcwd()
 RESULT_DIRECTORY = TOOL_DIRECTORY + '/results/'

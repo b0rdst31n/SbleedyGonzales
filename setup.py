@@ -1,4 +1,3 @@
-import os
 import subprocess
 from setuptools import setup, find_packages, Command
 from setuptools.command.install import install
