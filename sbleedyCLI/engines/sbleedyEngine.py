@@ -20,7 +20,7 @@ class SbleedyEngine:
         self.logger.setLevel(logging.DEBUG)
         self.verbosity = False
 
-    def construct_exploit_command(self, target: str, port: str, current_exploit: Exploit, parameters: list, directory: str) -> str:
+    def construct_exploit_command(self, target: str, ports: str, current_exploit: Exploit, parameters: list, directory: str) -> str:
         exploit_command = current_exploit.command.split(' ')
         
         parameters_dict = self.process_additional_parameters(parameters)
@@ -64,29 +64,31 @@ class SbleedyEngine:
                         exploit_command.append(target)
                 else:
                     exploit_command.append(target)
-            elif param['name'] == "port":
-                if param['name_required']:
-                    if param['parameter_connector'] != " ":
-                        exploit_command.append(param['name'] + param['parameter_connector'] + port)
+            elif param['name'].startswith("port_"):
+                device = param['name'].split("_", 1)[1]
+                port = ports.get(device)
+                if port:  
+                    if param['name_required']:
+                        if param['parameter_connector'] != " ":
+                            exploit_command.append(param['name'] + param['parameter_connector'] + port)
+                        else:
+                            exploit_command.append(param['name'])
+                            exploit_command.append(port)
                     else:
-                        exploit_command.append(param['name'])
                         exploit_command.append(port)
-                else:
-                    exploit_command.append(port)
             elif param['required']:
                 self.logger.error("Parameter {} is required, but was not found in your command".format(param['name']))
                 raise Exception("Parameter {} is required, but was not found in your command".format(param['name']))
         
         logging.info("SbleedyEngine.construct_exploit_command -> exploit_command list -> " + str(exploit_command))
-        logging.info("SbleedyEngine.construct_exploit_command -> exploit command together -> {}".format(' '.join(exploit_command)))
 
         return exploit_command
         
-    def run_test(self, target: str, port: str, current_exploit: Exploit, parameters: list) -> None:
+    def run_test(self, target: str, ports: str, current_exploit: Exploit, parameters: list) -> None:
         new_directory = const.EXPLOIT_TOOL_DIRECTORY
         new_directory += current_exploit.directory
 
-        exploit_command = self.construct_exploit_command(target, port, current_exploit, parameters, new_directory)
+        exploit_command = self.construct_exploit_command(target, ports, current_exploit, parameters, new_directory)
 
         if_failed, data = self.execute_command(target, exploit_command, current_exploit.name, timeout=current_exploit.max_timeout, directory=new_directory)
 

@@ -62,7 +62,7 @@ class Sbleedy():
     
     def set_exploits_hardware(self, hardware: list):
         available_exploits = self.get_available_exploits()
-        available_exploits = [exploit for exploit in available_exploits if exploit.hardware in hardware]
+        available_exploits = [exploit for exploit in available_exploits if all(hw.strip() in hardware for hw in exploit.hardware.split(','))]
         self.set_exploits(available_exploits)
 
     def get_available_exploits(self):
@@ -76,7 +76,7 @@ class Sbleedy():
             available_exploits = self.get_available_exploits()
         available_hardware = self.get_available_hardware()
         hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
-        return [exploit for exploit in available_exploits if hardware_verified[exploit.hardware]]
+        return [exploit for exploit in available_exploits if all(hardware_verified.get(hw.strip()) for hw in exploit.hardware.split(','))]
 
     def print_available_exploits(self):
         available_exploits = self.get_available_exploits()
@@ -100,7 +100,7 @@ class Sbleedy():
         for index, exploit in enumerate(available_exploits, start=1):
             symbol_hardware = '[red]X[/red]' 
             symbol_automated = '[red]X[/red]' 
-            if hardware_verified[exploit.hardware]:
+            if all(hardware_verified[hw.strip()] for hw in exploit.hardware.split(',')):
                 symbol_hardware = '[green]✓[/green]'  
             if exploit.mass_testing:
                 print(exploit.mass_testing)
@@ -203,7 +203,10 @@ class Sbleedy():
         return exploits
     
     def test_exploit(self, target, current_exploit, parameters) -> tuple:
-        current_port = self.hardwareEngine.get_hardware_port(current_exploit.hardware)
+        current_ports = {
+            hw.strip(): self.hardwareEngine.get_hardware_port(hw.strip()) 
+            for hw in current_exploit.hardware.split(',')
+        }
         print(f"Currently running {current_exploit.name}... ", end="")
         sys.stdout.flush()
 
@@ -221,7 +224,7 @@ class Sbleedy():
             spinner_thread = threading.Thread(target=spinner_task)
             spinner_thread.start()
         try:
-            result = self.engine.run_test(target, current_port, current_exploit, parameters)
+            result = self.engine.run_test(target, current_ports, current_exploit, parameters)
         finally:
             if not self.engine.verbosity:
                 stop_spinner = True
