@@ -27,7 +27,8 @@ RETURN_CODE_UNDEFINED = 3
 RETURN_CODE_NONE_OF_4_STATE_OBSERVED = 4
 RETURN_CODE_NOT_TESTED = 5
 
-BLUETOOTHCTL_SCAN = 'bluetoothctl --timeout 10 scan on'
+LESCAN = "sudo hcitool lescan"
+L2PING = "sudo l2ping {target}"
 HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
 BLUING_BR_SDP = ("sudo bluing br --sdp {target}", "bluing_sdp.log")
 BLUING_BR_LMP = ("sudo bluing br --lmp-features {target}", "bluing_lmp.log")

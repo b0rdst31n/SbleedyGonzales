@@ -3,6 +3,11 @@ __pycache__/
 *.egg-info/
 *.log
 build/*
+
 venv2/
 venv3/
+
 results/*
+
+modules/bleedingtooth/*
+!modules/bleedingtooth/*.*

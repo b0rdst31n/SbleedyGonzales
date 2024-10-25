@@ -23,7 +23,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 
 ### Prerequisites
 
-- **Python**: Python 2.7 (for certain exploits) and Python 3.10 (for the CLI tool). Other Python 3.x versions should work for the CLI tool, but nrfutil (for flashing the firmware) doesn't work with python versions such as 3.12.
+- **Python**: Python 2.7 (for certain exploits) and Python 3.10 (for the CLI tool).
 - **Pip**: Ensure pip is installed for both Python versions
 - **BLE Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
 

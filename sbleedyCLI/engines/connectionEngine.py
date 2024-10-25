@@ -47,11 +47,13 @@ def check_availability(target):
 
     subprocess.run(["sudo", "service", "bluetooth", "restart"], check=True)
     subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
-    process = subprocess.run(const.BLUETOOTHCTL_SCAN.split(), stdout= subprocess.PIPE, universal_newlines=True)
-    if target in process.stdout:
+    try:
+        process = subprocess.run(const.L2PING.format(target=target).split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, timeout=10)
+    except subprocess.TimeoutExpired:
         return True
-
-    return False
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return False
 
 def check_target(self, target):
     cont = True

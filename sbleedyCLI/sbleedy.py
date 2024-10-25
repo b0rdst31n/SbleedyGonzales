@@ -83,9 +83,7 @@ class Sbleedy():
         available_hardware = self.get_available_hardware()
         hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         
-        available_exploits = sorted(available_exploits, key=lambda x: x.type)
-        available_exploits = sorted(available_exploits, key=lambda x: x.hardware)
-        available_exploits = sorted(available_exploits, key=lambda x: not hardware_verified[x.hardware])
+        available_exploits = sorted(available_exploits, key=lambda x: x.name)
 
         print("\n")
         table = Table(title="Available Exploits")
@@ -95,6 +93,7 @@ class Sbleedy():
         table.add_column("Hardware", style="blue")
         table.add_column("BT Version", justify="center")
         table.add_column("BT Profile", justify="center")
+        table.add_column("Affected", justify="center")
         table.add_column("Available", justify="center")
 
         for index, exploit in enumerate(available_exploits, start=1):
@@ -107,8 +106,9 @@ class Sbleedy():
                 ' '.join(word.capitalize() for word in exploit.name.split('_')),
                 exploit.type,
                 exploit.hardware,
-                f"{exploit.bt_version_min} - {exploit.bt_version_max}",
+                f"{exploit.bt_version_min}-{exploit.bt_version_max}",
                 exploit.profile,
+                exploit.affected,
                 symbol
             )
 
@@ -119,7 +119,7 @@ class Sbleedy():
         print("\nChecking device availability...")
         cont = True
         while cont:
-            for i in range(10):
+            for i in range(5):
                 available = check_availability(target)
                 if available:
                     return True
@@ -150,8 +150,7 @@ class Sbleedy():
         available_exploits = self.get_available_exploits()
         exploits_with_setup = self.exploit_filter(target=target, exploits=self.get_exploits_with_setup())
 
-        if not check_availability(target):
-            sys.exit(1)
+        self.check_target(target)
 
         print("There are {} out of {} exploits available.".format(len(exploits_with_setup), len(available_exploits)))
         print("Running the following exploits: {}\n".format([exploit.name for exploit in exploits_with_setup]))
@@ -378,8 +377,6 @@ def main():
                 expRunner.start_from_cli_all(args.target, args.rest)
     else:
         parser.print_help()
-    
-    os.chdir(TOOL_DIRECTORY)
 
 if __name__ == '__main__':
     main()
