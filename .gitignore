@@ -8,6 +8,3 @@ venv2/
 venv3/
 
 results/*
-
-modules/bleedingtooth/*
-!modules/bleedingtooth/*.*
