@@ -46,7 +46,7 @@ setup(
         'scapy',
         'colorama',
         'tabulate',
-        'bluing'
+        'bleak'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

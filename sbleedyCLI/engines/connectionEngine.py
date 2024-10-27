@@ -5,6 +5,8 @@ import time
 import os
 import signal
 import sys
+import asyncio
+from bleak import BleakScanner
 
 import sbleedyCLI.constants as const
 
@@ -41,19 +43,21 @@ def check_hci_device():
         print(f"Error checking HCI device: {e}")
         return False
 
-def check_availability(target):
+async def check_availability_async(target):
     if not check_hci_device():
         return False
 
-    subprocess.run(["sudo", "service", "bluetooth", "restart"], check=True)
+    subprocess.run(["sudo", "rfkill", "unblock", "bluetooth"], check=True)
+    subprocess.run(["sudo", "systemctl", "restart", "bluetooth"], check=True)
     subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
-    try:
-        process = subprocess.run(const.L2PING.format(target=target).split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, timeout=10)
-    except subprocess.TimeoutExpired:
+    
+    device = await BleakScanner.find_device_by_address(target, cb=dict(use_bdaddr=True))
+    if device:
         return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
-        return False
+    return False
+
+def check_availability(target):
+    return asyncio.run(check_availability_async(target))
 
 def check_target(self, target):
     cont = True

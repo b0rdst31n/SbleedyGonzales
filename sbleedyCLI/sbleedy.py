@@ -196,11 +196,11 @@ class Sbleedy():
             logging.info("There are {} exploits to work on".format(len(exploits)))
         
         bt_profile = self.recon.check_bt_profile(target)
-        cleaned_bt_profile = re.sub(r'\s*\(.*?\)', '', bt_profile).strip()
-        profile_list = [profile.strip() for profile in cleaned_bt_profile.split('+')]
         if bt_profile is not None:
             print(f"Skipping all exploits that do not apply to the Bluetooth profile of the target: {bt_profile}")
             logging.info(f"Target Bluetooth profile: {bt_profile}. Skipping all exploits that do not apply to this profile.")
+            cleaned_bt_profile = re.sub(r'\s*\(.*?\)', '', bt_profile).strip()
+            profile_list = [profile.strip() for profile in cleaned_bt_profile.split('+')]
             exploits = [exploit for exploit in exploits if exploit.profile in profile_list]
             logging.info("There are {} exploits to work on".format(len(exploits)))
 
