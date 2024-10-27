@@ -17,7 +17,31 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 - **[Sweyntooth](https://asset-group.github.io/disclosures/sweyntooth/)**: A suite of exploits targeting BLE vulnerabilities like L2CAP length overflow, truncated L2CAP, and more, leading to Crashes, Deadlocks and Security Bypasses.
 - **[KNOB BLE](https://knobattack.com/)**: A security vulnerability that allows attackers to interfere with the pairing process by reducing the entropy of the encryption key, making it easier to perform brute-force attacks and potentially gain unauthorized access.
 - **[BleedingTooth](https://google.github.io/security-research/pocs/linux/bleedingtooth/writeup.html)**: Set of zero-click vulnerabilities in the Linux Bluetooth subsystem that can allow an unauthenticated remote attacker in short distance to execute arbitrary code with kernel privileges on vulnerable devices.
-- **More to come**
+- **More to come...**
+
+| Exploit                               | Type | Hardware  | BT Version | BT Profile | Affected                                              | Automated |
+|---------------------------------------|------|-----------|------------|------------|-------------------------------------------------------|-----------|
+| Att Read 100 Silent Overflow Crash    | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Dialog (DA14680)                                      | ❌         |
+| Bleedingtooth Badchoice               | DoS  | hci           | 1.0-5.4   | BR/EDR     | Linux kernel versions ≥ 3.6 - 5.8                     | ✅         |
+| Bleedingtooth Badkarma                | DoS  | hci           | 1.0-5.4   | BR/EDR     | Linux kernel versions ≥ 4.8 - 5.8                     | ✅         |
+| Bleedingtooth Badvibes                | DoS  | hci           | 1.0-5.4   | BR/EDR     | Linux kernel versions ≥ 4.8 - 5.8                     | ✅         |
+| Connection Request Crash Truncated Knob Ble | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Texas Instruments (CC2540)                            | ❌         |
+| Sweyntooth Dhcheck Skip               | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Apple, Broadcom (Cypress), Cambridge Silicon Radio (CSR), Exynos, Mediatek, Intel, Qualcomm | ❌         |
+| Sweyntooth Esp32 Hci Desync           | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Texas Instruments                                     | ❌         |
+| Sweyntooth Invalid Channel Map        | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Espressif Systems                                     | ❌         |
+| Sweyntooth Invalid Connection Request | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Zephyr Project, Espressif Systems, Microchip          | ❌         |
+| Sweyntooth Invalid L2cap Fragment     | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Texas Instruments                                     | ❌         |
+| Sweyntooth Key Size Overflow          | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Microchip                                             | ❌         |
+| Sweyntooth Link Layer Length Overflow | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Telink                                                | ✅         |
+| Sweyntooth Llid Deadlock              | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Cypress, NXP                                          | ❌         |
+| Sweyntooth Public Key Crash           | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Cypress, NXP                                          | ❌         |
+| Sweyntooth Sequential Att Deadlock    | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Texas Instruments (CC2640R2)                          | ❌         |
+| Sweyntooth Silent Length Overflow     | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | STMicroelectronics                                    | ❌         |
+| Sweyntooth Truncated L2cap            | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Dialog (DA14680)                                      | ✅         |
+| Sweyntooth Zephyr Invalid Sequence    | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Dialog (DA14580)                                      | ❌         |
+| Sweyntooth Zero Ltk Installation      | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Zephyr Project                                        | ❌         |
+| Truncated L2cap Crash                 | DoS  | hci, nRF52840 | 4.0-5.4   | LE         | Telink                                                | ✅         |
+
 
 ## Installation
 
