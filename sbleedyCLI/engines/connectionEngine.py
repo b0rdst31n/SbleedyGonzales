@@ -51,7 +51,7 @@ async def check_availability_async(target):
     subprocess.run(["sudo", "systemctl", "restart", "bluetooth"], check=True)
     subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
     
-    device = await BleakScanner.find_device_by_address(target, cb=dict(use_bdaddr=True))
+    device = await BleakScanner.find_device_by_address(target, cb=dict(use_bdaddr=True)) #TODO: add discover for BR/EDR, e.g. with L2Ping
     if device:
         return True
     return False
