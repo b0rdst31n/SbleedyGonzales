@@ -55,7 +55,7 @@ class SbleedyEngine:
                     exploit_command.append(parameters_dict[param['name']])
                 parameters_list.remove(param['name'])
                 parameters_dict.pop(param['name'])
-            elif param['name'] == "target":
+            elif "target" in param['name']:
                 if param['name_required']:
                     if param['parameter_connector'] != " ":
                         exploit_command.append(param['name'] + param['parameter_connector'] + target)
