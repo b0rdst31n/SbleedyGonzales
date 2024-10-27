@@ -116,7 +116,7 @@ class SbleedyEngine:
                 output_bytes = b''
 
                 while True:
-                    if time.time() - start_time > timeout:
+                    if timeout != -1 and time.time() - start_time > timeout:
                         raise subprocess.TimeoutExpired(exploit_command, timeout)
                     output = process.stdout.readline()
                     if output == '' and process.poll() is not None:
