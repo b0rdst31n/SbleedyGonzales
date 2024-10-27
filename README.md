@@ -111,3 +111,12 @@ Run sbleedy and list all available exploits:
 
 Documentation is available at: [... to be added]
 ```
+
+## Credit
+
+This project builds upon the foundational work provided by [BlueToolkit](https://github.com/sgxgsx/BlueToolkit). While adapting some elements from BlueToolkit's structure and code, I have tailored and expanded upon these components to fit the specific requirements of my framework for automated BLE exploit running. 
+Special thanks to the contributors of BlueToolkit for providing a solid foundation and valuable resources for Bluetooth exploration.
+This framework includes the following PoC implementations for BLE vulnerabilities:
+- [Sweyntooth Bluetooth Low Energy Attacks](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks) by Matheus Garbelini
+- Bleedingtooth [BadKarma](https://github.com/google/security-research/security/advisories/GHSA-h637-c88j-47wq), [BadVibes](https://github.com/google/security-research/security/advisories/GHSA-ccx2-w2r4-x649) and [BadChoice](https://github.com/google/security-research/security/advisories/GHSA-7mh3-gq28-gfrq) by Google Security Research
+- [KNOB BLE Attack](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks/blob/master/extras/knob_tester_ble.py) by Matheus Garbelini
