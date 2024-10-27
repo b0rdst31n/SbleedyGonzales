@@ -97,7 +97,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 ## Usage
 
 ```console
-usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-e EXPLOITS [EXPLOITS ...]] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-fh HARDWARE] [-v] ...
+usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-in EXPLOITS [EXPLOITS ...]] [-a] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-fh HARDWARE] [-v] ...
 
 options:
   -h, --help            show this help message and exit
@@ -109,7 +109,8 @@ options:
   -ex EXPLOITS [EXPLOITS ...], --exclude EXPLOITS [EXPLOITS ...]
                         Exclude exploits (e.g. --exclude exploit1, exploit2 OR --exclude 1,5)
   -in EXPLOITS [EXPLOITS ...], --include EXPLOITS [EXPLOITS ...]
-                        Scan only for provided (e.g. --exploits exploit1, exploit2 OR --exploits 1-4), --exclude is not taken into account
+                        Scan only for provided (e.g. --include exploit1, exploit2 OR --include 1-4), --exclude is not taken into account
+  -a, --auto            Run only automated scripts (that require no user input or interaction. e.g. to establish a connection)
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device
@@ -128,12 +129,12 @@ Run sbleedy connectivity check:
    $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -ct
 
 Run sbleedy with specific exploits:
-   $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -e invalid_max_slot au_rand_flooding internalblue_knob
+   $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -e 1-3,5
 
 Run sbleedy and list all available exploits:
    $ sudo sbleedy -l
 
-Documentation is available at: [... to be added]
+Documentation is available at the [SbleedyGonzales Wiki](https://github.com/b0rdst31n/SbleedyGonzales/wiki).
 ```
 
 ## Credit
