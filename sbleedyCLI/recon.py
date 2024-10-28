@@ -58,7 +58,7 @@ class Recon():
                 print(f"[!] BT Version Check - Error: {str(e)}")
                 return None 
 
-    def check_bt_profile(self, target) -> str:
+    def check_bt_profile(self, target) -> str: #TODO: check profile and version without Bluing
         file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.HCITOOL_INFO[1])
         if file_path.is_file():
             with file_path.open('r') as f:

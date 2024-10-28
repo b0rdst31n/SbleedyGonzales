@@ -129,7 +129,7 @@ Run sbleedy connectivity check:
    $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -ct
 
 Run sbleedy with specific exploits:
-   $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -e 1-3,5
+   $ sudo sbleedy -t AA:BB:CC:DD:EE:FF -in 1-3,5
 
 Run sbleedy and list all available exploits:
    $ sudo sbleedy -l
