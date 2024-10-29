@@ -10,7 +10,7 @@ import asyncio
 from bleak import BleakScanner
 
 import sbleedyCLI.constants as const
-COMMANDS = [const.HCITOOL_INFO]
+COMMANDS = [const.HCITOOL_INFO, const.BLUING_BR_SDP, const.BLUING_BR_LMP]
 
 class Recon():
     def enable_logging(self):
@@ -37,35 +37,35 @@ class Recon():
     
     def determine_bluetooth_version(self, target) -> float:
         self.enable_logging()
-        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.HCITOOL_INFO[1])
+        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
-                mm = re.compile(const.REGEX_BT_VERSION_HCITOOL)
+                mm = re.compile(const.REGEX_BT_VERSION)
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
         else:
             print("Please note: when running the recon script once for the target, the version and profile checks will be much faster.")
             try:
-                result = subprocess.run(const.HCITOOL_INFO[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 if result.returncode != 0:
                     print(f"[!] BT Version Check - Error: {result.stderr.strip()}")
                     return None
-                mm = re.compile(const.REGEX_BT_VERSION_HCITOOL)
+                mm = re.compile(const.REGEX_BT_VERSION)
                 output = mm.search(result.stdout).group()
                 return float(output.split(" ")[3])
             except Exception as e:
                 print(f"[!] BT Version Check - Error: {str(e)}")
                 return None 
 
-    def check_bt_profile(self, target) -> str: #TODO: check profile and version without Bluing
-        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.HCITOOL_INFO[1])
+    def check_bt_profile(self, target) -> str: 
+        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 output = f.read()
         else:       
             try:
-                result = subprocess.run(const.HCITOOL_INFO[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 if result.returncode != 0:
                     print(f"[!] BT Profile Check - Error: {result.stderr.strip()}")
                     return None

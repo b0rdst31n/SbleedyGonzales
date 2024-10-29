@@ -203,7 +203,10 @@ class Sbleedy():
             profile_list = [profile.strip() for profile in cleaned_bt_profile.split('+')]
             exploits = [exploit for exploit in exploits if exploit.profile in profile_list]
             logging.info("There are {} exploits to work on".format(len(exploits)))
-
+        
+        if any([exploit for exploit in self.get_available_exploits() if "sweyntooth" in exploit.name]):
+            print("[i] Please make sure that Sweyntooth firmware is on the nRF dongle (run sbleedy -fhw nRF52840)")
+        
         return exploits
     
     def test_exploit(self, target, current_exploit, parameters) -> tuple:
@@ -311,7 +314,7 @@ def main():
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-hw', '--hardware', required=False, nargs='+', default=[], type=str, help="Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account")
     parser.add_argument('-chw','--checkhardware', required=False, action='store_true',  help="Check for connected hardware")
-    parser.add_argument('-fh','--flashhardware', required=False, type=str,  help="Flash connected hardware")
+    parser.add_argument('-fhw','--flashhardware', required=False, type=str,  help="Flash connected hardware")
     parser.add_argument('-v','--verbose',  required=False, action='store_true', help="Additional output during exploit execution")
     parser.add_argument('-a','--auto',  required=False, action='store_true', help="Run only automated scripts (that require no user input)")
     parser.add_argument('rest', nargs=argparse.REMAINDER)

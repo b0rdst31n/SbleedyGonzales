@@ -27,7 +27,9 @@ RETURN_CODE_NONE_OF_4_STATE_OBSERVED = 4
 RETURN_CODE_NOT_TESTED = 5
 
 LESCAN = "sudo hcitool lescan"
-L2PING = "sudo l2ping {target}"
+L2PING = "sudo l2ping -c 10 {target}"
+BLUING_BR_SDP = ("sudo bluing br --sdp {target}", "bluing_sdp.log")
+BLUING_BR_LMP = ("sudo bluing br --lmp-features {target}", "bluing_lmp.log")
 HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
 REGEX_BT_VERSION = r"Bluetooth Core Specification [0-9]{1}(\.){0,1}[0-9]{0,1}\ "
 REGEX_BT_VERSION_HCITOOL = r"\(0x[0-f]{1}\) LMP Subversion:"

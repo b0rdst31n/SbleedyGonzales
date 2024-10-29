@@ -121,7 +121,7 @@ class Report:
         return table
     
     def get_manufacturer(self, target) -> str:
-        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.HCITOOL_INFO[1])
+        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
@@ -130,11 +130,11 @@ class Report:
                 return output.split(":")[1].strip()
     
     def get_bt_version(self, target) -> float:
-        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.HCITOOL_INFO[1])
+        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
-                mm = re.compile(const.REGEX_BT_VERSION_HCITOOL)
+                mm = re.compile(const.REGEX_BT_VERSION)
                 output = mm.search(text).group()
                 return float(output.split(" ")[3])
 
