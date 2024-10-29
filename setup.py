@@ -17,8 +17,16 @@ class InitSubmodules(Command):
     def run(self):
         try:
             subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+
+            pybluez_path = os.path.join('helpers', 'pybluez')
+            if os.path.isdir(pybluez_path):
+                os.chdir(pybluez_path)
+                subprocess.check_call(['python', 'setup.py', 'install'])
+            else:
+                print(f"Error: {pybluez_path} directory not found.")
+                exit(1)
         except subprocess.CalledProcessError as e:
-            print(f"Error initializing submodules: {e}")
+            print(f"Error during submodule initialization or installation: {e}")
             exit(1)
 
 class CustomInstallCommand(install):
@@ -48,7 +56,8 @@ setup(
         'scapy',
         'colorama',
         'tabulate',
-        'bleak'
+        'bleak',
+        'pwntools'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

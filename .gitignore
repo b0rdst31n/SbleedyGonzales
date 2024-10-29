@@ -11,3 +11,6 @@ results/*
 
 modules/bleedingtooth/*
 !modules/bleedingtooth/*.*
+modules/blueborne/*
+!modules/blueborne/*.*
+helpers/pybluez/*

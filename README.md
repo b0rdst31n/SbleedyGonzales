@@ -97,7 +97,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 ## Usage
 
 ```console
-usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-in EXPLOITS [EXPLOITS ...]] [-a] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-fh HARDWARE] [-v] ...
+usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-in EXPLOITS [EXPLOITS ...]] [-wi] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-fh HARDWARE] [-v] ...
 
 options:
   -h, --help            show this help message and exit
@@ -110,7 +110,7 @@ options:
                         Exclude exploits (e.g. --exclude exploit1, exploit2 OR --exclude 1,5)
   -in EXPLOITS [EXPLOITS ...], --include EXPLOITS [EXPLOITS ...]
                         Scan only for provided (e.g. --include exploit1, exploit2 OR --include 1-4), --exclude is not taken into account
-  -a, --auto            Run only automated scripts (that require no user input or interaction. e.g. to establish a connection)
+  -wi, --withinput      Also run non automated scripts (that require user input or interaction. e.g. to establish a connection), per default (without this flag) only automated scripts (mass_testing = true) are being executed
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device
@@ -145,3 +145,4 @@ This framework includes the following PoC implementations for BLE vulnerabilitie
 - [Sweyntooth Bluetooth Low Energy Attacks](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks) by Matheus Garbelini
 - Bleedingtooth [BadKarma](https://github.com/google/security-research/security/advisories/GHSA-h637-c88j-47wq), [BadVibes](https://github.com/google/security-research/security/advisories/GHSA-ccx2-w2r4-x649) and [BadChoice](https://github.com/google/security-research/security/advisories/GHSA-7mh3-gq28-gfrq) by Google Security Research
 - [KNOB BLE Attack](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks/blob/master/extras/knob_tester_ble.py) by Matheus Garbelini
+- BlueBorne [CVE-2017-0785](https://github.com/ojasookert/CVE-2017-0785) and [CVE-2017-0781](https://github.com/ojasookert/CVE-2017-0781) by ojasookert and [CVE-2017-1000251](https://github.com/sgxgsx/blueborne-CVE-2017-1000251) by marcinguy
