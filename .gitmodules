@@ -1,3 +1,6 @@
 [submodule "helpers/pybluez"]
 	path = helpers/pybluez
 	url = https://github.com/pybluez/pybluez.git
+[submodule "modules/sweyntooth"]
+	path = modules/sweyntooth
+	url = https://github.com/b0rdst31n/sweyntooth_bluetooth_low_energy_attacks.git
