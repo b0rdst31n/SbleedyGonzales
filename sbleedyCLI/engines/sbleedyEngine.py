@@ -55,7 +55,7 @@ class SbleedyEngine:
                     exploit_command.append(parameters_dict[param['name']])
                 parameters_list.remove(param['name'])
                 parameters_dict.pop(param['name'])
-            elif "target" in param['name']:
+            elif param['name'] in ['target', '-target', '--target']:
                 if param['name_required']:
                     if param['parameter_connector'] != " ":
                         exploit_command.append(param['name'] + param['parameter_connector'] + target)
@@ -149,10 +149,13 @@ class SbleedyEngine:
     
     def process_raw_data(self, data, if_failed):
         #TODO: INEFFICIENTLY processes data line by line (there is room for improvement)
+        keyword = b"SBLEEDY_GONZALES DATA"
+        keyword_index = data.find(keyword)
+        if keyword_index != -1:
+            data = data[keyword_index:]
         try:
-            mm = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA)
+            mm = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA, re.DOTALL)
             output = mm.search(data).group()
-            print(output)
             logging.info("SbleedyEngine.process_raw_data -> Found data from the exploit {}".format(output))
             
             mm2 = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA_CODE)

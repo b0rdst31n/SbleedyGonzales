@@ -1,6 +1,7 @@
 import os
+from pathlib import Path
 
-TOOL_DIRECTORY = os.getcwd()
+TOOL_DIRECTORY = str(Path(__file__).resolve().parents[1])
 RESULT_DIRECTORY = TOOL_DIRECTORY + '/results/'
 LOG_FILE = TOOL_DIRECTORY + '/results/application.log'
 EXPLOIT_YAML_DIRECTORY = TOOL_DIRECTORY + '/exploits/'
@@ -35,7 +36,10 @@ REGEX_BT_VERSION = r"Bluetooth Core Specification [0-9]{1}(\.){0,1}[0-9]{0,1}\ "
 REGEX_BT_VERSION_HCITOOL = r"\(0x[0-f]{1}\) LMP Subversion:"
 REGEX_BT_MANUFACTURER = r"Manufacturer name: .*\n"
 
-REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY_GONZALES DATA:.*\n"
+REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY_GONZALES DATA:.*"
 REGEX_EXPLOIT_OUTPUT_DATA_CODE = b" code=[0-4],"
 REGEX_EXPLOIT_OUTPUT_DATA_DATA = b", data=.*"
 MAX_CHARS_DATA_TRUNCATION = 80
+
+COMMAND_CONNECT = TOOL_DIRECTORY + "/helpers/reconnect.sh {target}"
+REGEX_COMMAND_CONNECT = "Device {target} Connected: yes"

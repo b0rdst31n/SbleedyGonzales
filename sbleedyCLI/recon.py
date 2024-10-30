@@ -9,6 +9,7 @@ from pathlib import Path
 import asyncio
 from bleak import BleakScanner
 
+from sbleedyCLI.engines.connectionEngine import check_connectivity_classic
 import sbleedyCLI.constants as const
 COMMANDS = [const.HCITOOL_INFO, const.BLUING_BR_SDP, const.BLUING_BR_LMP]
 
@@ -104,3 +105,47 @@ class Recon():
             return "LE (Low Energy)"
         else:
             return "Unknown or unsupported profile"
+
+    def start_hcidump(self):
+        logging.info("Starting hcidump -X...")
+        process = subprocess.Popen(["hcidump", "-X"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return process
+
+    def stop_hcidump(self, process):
+        logging.info("Stopping hcidump -X...")
+        process.send_signal(subprocess.signal.SIGINT)
+        output, _ = process.communicate()
+        logging.info("hcidump -> " + str(output.decode()))
+        logging.info("hcidump -X stopped.")
+        return output
+
+    def get_hcidump(self, target):
+        hcidump_process = self.start_hcidump()
+        try:
+            time.sleep(2)
+            check_connectivity_classic(target)
+        finally:
+            return self.stop_hcidump(hcidump_process).decode().split("\n")
+    
+    def get_capabilities(self, target):
+        output = self.get_hcidump(target)
+        # Our capability is set as NoInputNoOutput so the other one should be a target device capability
+        capabilities = set()
+        numb_of_capabilities = 0 
+        for line in output:
+            if line.strip().startswith("Capability:"):
+                capabilities.add(line.strip().split(" ")[1])
+                numb_of_capabilities += 1
+        logging.info("recon.py -> found the following capabilities " + str(capabilities))
+        if len(capabilities) == 0:
+            logging.info("recon.py -> most likely legacy pairing")
+            return None
+        elif numb_of_capabilities == 1:
+            logging.info("recon.py -> got only 1 capability " + str(capabilities))
+            return capabilities.pop()
+        capabilities.remove('NoInputNoOutput')
+        capability = None
+        if len(capabilities) == 0:
+            return "NoInputNoOutput"
+        else:
+            return capabilities.pop()
