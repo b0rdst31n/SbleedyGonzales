@@ -19,7 +19,7 @@ from .engines.hardwareEngine import HardwareEngine
 from .engines.sbleedyEngine import SbleedyEngine
 from sbleedyCLI.engines.connectionEngine import check_availability
 from .recon import Recon
-from .report import Report
+from .report import Report, get_manufacturer
 from .checkpoint import Checkpoint
 
 class Sbleedy():
@@ -146,9 +146,9 @@ class Sbleedy():
     
     def run_recon(self, target):
         self.recon.run_recon(target)
-        v = self.recon.determine_bluetooth_version(target)
-        print(f"Bluetooth Version of target device: {v}")
+        print(f"Bluetooth Version of target device: {self.recon.determine_bluetooth_version(target)}")
         print(f"BT Profile: {self.recon.check_bt_profile(target)}")
+        print(f"Bluetooth Manufacturer: {get_manufacturer(target)}")
     
     def start_from_cli_all(self, target, parameters) -> None:
         logging.info("start_from_cli_all -> Target: {}".format(target))

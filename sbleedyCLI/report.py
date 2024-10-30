@@ -120,15 +120,6 @@ class Report:
 
         return table
     
-    def get_manufacturer(self, target) -> str:
-        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
-        if file_path.is_file():
-            with file_path.open('r') as f:
-                text = f.read()
-                mm = re.compile(const.REGEX_BT_MANUFACTURER)
-                output = mm.search(text).group()
-                return output.split(":")[1].strip()
-    
     def get_bt_version(self, target) -> float:
         file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
         if file_path.is_file():
@@ -179,17 +170,21 @@ class Report:
         output_json["skipped_exploits"] = skipped_exploits_json
         output_json['manually_added_exploits'] = list()
         output_json["bt_version"] = self.get_bt_version(target=target)
-        output_json['manufacturer'] = self.get_manufacturer(target=target)
+        output_json['manufacturer'] = get_manufacturer(target=target)
         output_json['mac_address'] = target
-        output_json['vehicle_name'] = ""
-        output_json["vehicle manufacturer"] = ""
-        output_json['parent_company'] = ""
-        output_json["year_manufactured"] = 1
         
         jsonfile = open(const.MACHINE_READABLE_REPORT_OUTPUT_FILE.format(target=target), 'w')
         json.dump(output_json, jsonfile, indent=6)
         jsonfile.close()
 
+def get_manufacturer(target) -> str:
+    file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
+    if file_path.is_file():
+        with file_path.open('r') as f:
+            text = f.read()
+            mm = re.compile(const.REGEX_BT_MANUFACTURER)
+            output = mm.search(text).group()
+            return output.split(":")[1].strip()
 
 if __name__ == "__main__":
     pass 
