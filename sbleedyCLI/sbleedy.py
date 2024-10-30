@@ -245,7 +245,7 @@ class Sbleedy():
             response_code, data = self.test_exploit(target, exploits[i], parameters)
             self.done_exploits.append([exploits[i].name, response_code, data])
             logging.info("Sbleedy.test_one_by_one -> done exploits - " + str(self.done_exploits))
-            self.report.save_data(exploit_name=exploits[i].name, target=target, data=data, code=response_code)
+            self.report.save_data(exploit=exploits[i], target=target, data=data, code=response_code)
     
     def spinning_cursor(self):
         spinner = itertools.cycle(['|', '/', '-', '\\'])

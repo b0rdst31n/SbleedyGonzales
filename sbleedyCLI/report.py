@@ -36,10 +36,12 @@ class Report:
     def __init__(self):
         self.exploitEngine = ExploitEngine()
 
-    def save_data(self, exploit_name, target, data, code):
+    def save_data(self, exploit, target, data, code):
+        exploit_name = exploit.name
         doc = {
             "code": code,
-            "data": data 
+            "data": data,
+            "cve": exploit.cve 
         }
         logging.info("Report - save_data -> document -> " + str(doc))
 
@@ -55,8 +57,8 @@ class Report:
             doc = json.load(jsonfile)
             logging.info("Report output data is loaded")
             logging.info("Report - read_data -> document -> " + str(doc))
-            return doc["code"], doc["data"]
-        return None, None
+            return doc["code"], doc["data"], doc["cve"]
+        return None, None, None
 
     def get_done_exploits(self, target):
         path = Path(const.OUTPUT_DIRECTORY.format(target=target))
@@ -73,7 +75,7 @@ class Report:
         logging.info("Report.generate_report -> all_exploits = " + str(all_exploits))
         logging.info("Report.generate_report -> skipped_exploits = " + str(skipped_exploits))
 
-        headers = ['Index', 'Exploit', 'Result', 'Data']
+        headers = ['Index', 'Exploit', 'Result', 'Data', 'CVE']
         index = 1
         sorted_done_exploits = sorted(done_exploits, key=lambda x: x[2])
 
@@ -84,7 +86,7 @@ class Report:
             table.add_column(header, justify="center")
 
         for exploit in sorted_done_exploits:
-            code, data = self.read_data(exploit_name=exploit, target=target)
+            code, data, cve = self.read_data(exploit_name=exploit, target=target)
             if code is None:
                 code = const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED
                 data = "Error during loading the report"
@@ -98,22 +100,22 @@ class Report:
                 symbol = '⚠'
             
             if code == const.RETURN_CODE_VULNERABLE:
-                table.add_row(str(index), f"[red]{exploit}[/red]", f"[red]Vulnerable {symbol}[/red]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[red]{exploit}[/red]", f"[red]Vulnerable {symbol}[/red]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_NOT_VULNERABLE:
-                table.add_row(str(index), f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_ERROR:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_UNDEFINED:
-                table.add_row(str(index), f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             else:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error during report generation {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION])
+                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error during report generation {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
         
             index += 1
 
         for skipped_exploit in skipped_exploits:
-            table.add_row(str(index), f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "")
+            table.add_row(str(index), f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
             index += 1
 
         logging.info("Report.generate_report -> table_data created")
@@ -121,7 +123,7 @@ class Report:
         return table
     
     def get_bt_version(self, target) -> float:
-        file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
+        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
         if file_path.is_file():
             with file_path.open('r') as f:
                 text = f.read()
@@ -145,7 +147,7 @@ class Report:
         sorted_done_exploits_json = []
         skipped_exploits_json = []
         for exploit in sorted_done_exploits:
-            code, data = self.read_data(exploit_name=exploit, target=target)
+            code, data, cve = self.read_data(exploit_name=exploit, target=target)
             if code is None:
                 code = const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED
                 data = "Error during loading the report"
@@ -154,7 +156,8 @@ class Report:
                 "index": index,
                 "name":exploit,
                 "code": code,
-                "data": data 
+                "data": data,
+                "cve": cve 
             })
             index += 1
         for skipped_exploit in skipped_exploits:
@@ -162,7 +165,8 @@ class Report:
                 "index": index,
                 "name": skipped_exploit,
                 "code": 6,
-                "data": "Not tested"
+                "data": "Not tested",
+                "cve": ""
             })
             index += 1
         
@@ -178,7 +182,7 @@ class Report:
         jsonfile.close()
 
 def get_manufacturer(target) -> str:
-    file_path = Path(const.OUTPUT_DIRECTORY.format(target=target) + "/recon/" + const.BLUING_BR_LMP[1])
+    file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
     if file_path.is_file():
         with file_path.open('r') as f:
             text = f.read()
