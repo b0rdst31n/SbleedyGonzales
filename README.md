@@ -115,8 +115,8 @@ options:
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device
-  -hw HARDWARE [HARDWARE ...], --hardware HARDWARE [HARDWARE ...]
-                        Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account
+  -hw HARDWARE, --hardware HARDWARE
+                        Scan only for provided exploits based on hardware, e.g. --hardware nRF52840; --exclude and --exploit are not taken into account
   -chw, --checkhardware Check for connected hardware
   -fhw, --flashhardware HARDWARE
                         Flash firmware onto connected hardware (e.g. -fhw nRF52840), get hardware names with -chw

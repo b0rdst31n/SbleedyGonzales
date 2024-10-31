@@ -62,10 +62,10 @@ class Sbleedy():
         else: 
             self.exploits_to_scan = exploits_to_scan
     
-    def set_exploits_hardware(self, hardware: list):
+    def set_exploits_hardware(self, hardware: str):
         available_exploits = self.get_available_exploits()
-        available_exploits = [exploit for exploit in available_exploits if all(hw.strip() in hardware for hw in exploit.hardware.split(','))]
-        self.set_exploits(available_exploits)
+        available_exploits = [exploit.name for exploit in available_exploits if any(hw.strip() == hardware for hw in exploit.hardware.split(','))]
+        self.exploits_to_scan = available_exploits
 
     def get_available_exploits(self):
         return self.exploitEngine.get_all_exploits()
@@ -337,7 +337,7 @@ def main():
     parser.add_argument('-r', '--recon', required=False, action='store_true', help="Run a recon script")
     parser.add_argument('-re', '--report', required=False, action='store_true', help="Create a report for a target device")
     parser.add_argument('-rej','--reportjson', required=False, action='store_true', help="Create a report for a target device")
-    parser.add_argument('-hw', '--hardware', required=False, nargs='+', default=[], type=str, help="Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account")
+    parser.add_argument('-hw', '--hardware', required=False, type=str, help="Scan only for provided exploits based on hardware, e.g. --hardware nRF52840; --exclude and --exploit are not taken into account")
     parser.add_argument('-chw','--checkhardware', required=False, action='store_true',  help="Check for connected hardware")
     parser.add_argument('-fhw','--flashhardware', required=False, type=str,  help="Flash connected hardware")
     parser.add_argument('-v','--verbose',  required=False, action='store_true', help="Additional output during exploit execution")
@@ -379,20 +379,12 @@ def main():
         expRunner.target = args.target
         if args.withinput:
             expRunner.only_automated = False
-        if len(args.hardware) > 0:
-            av_hardware_list = []
-            hardware_found = False
-            for hw in expRunner.get_available_hardware():
-                av_hardware_list.append(hw.name)
-            
-            for provided_hardware in args.hardware: 
-                if provided_hardware in av_hardware_list:
-                    expRunner.set_exploits_hardware(provided_hardware)
-                    logging.info(f"Provided --hardware parameter -> {provided_hardware}")
-                    hardware_found = True
-                    break 
-
-            if not hardware_found:
+        if args.hardware:
+            av_hardware_list = [hw.name for hw in expRunner.get_available_hardware()]
+            if args.hardware in av_hardware_list:
+                expRunner.set_exploits_hardware(args.hardware)
+                logging.info(f"Provided --hardware parameter -> {args.hardware}")
+            else:
                 print(f"\nAvailable hardware: {', '.join(av_hardware_list)}")
                 sys.exit(1)
         elif len(args.include) > 0:
