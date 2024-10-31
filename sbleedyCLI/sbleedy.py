@@ -8,6 +8,7 @@ import itertools
 import threading
 import time
 import re
+import textwrap
 from tqdm import tqdm
 from pathlib import Path
 from rich.table import Table
@@ -78,6 +79,29 @@ class Sbleedy():
         available_hardware = self.get_available_hardware()
         hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
         return [exploit for exploit in available_exploits if all(hardware_verified.get(hw.strip()) for hw in exploit.hardware.split(','))]
+
+    def print_exploit_info(self, exploits_to_print: list):
+        exploits_to_print = self.exploitEngine.get_exploits_by_index(exploits_to_print)
+        print("\n")
+        for ex_name in exploits_to_print:
+            curr_exploit = self.exploitEngine.get_exploit_by_name(ex_name)
+            if curr_exploit:
+                print(f"\033[1m{curr_exploit.name}\033[0m")
+                width = os.get_terminal_size().columns
+                print("=" * width)
+                print(f"PoC Source    : {curr_exploit.poc_source}")
+                if curr_exploit.cve:
+                    cve_link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={curr_exploit.cve}"
+                    print(f"CVE           : {curr_exploit.cve} ({cve_link})")
+                else:
+                    print("CVE           : -")
+                print(f"Affected      : {curr_exploit.affected}")
+                print(f"Profile       : {curr_exploit.profile}")
+                print(f"Type          : {curr_exploit.type}")
+                wrapped_description = textwrap.fill(curr_exploit.description, width=width-15, subsequent_indent=" " * 16)
+                print(f"Description   : {wrapped_description}")
+                print("=" * width)
+                print() 
 
     def print_available_exploits(self):
         available_exploits = self.get_available_exploits()
@@ -305,6 +329,7 @@ def main():
     parser = argparse.ArgumentParser(description="SbleedyGonzales CLI tool")
     parser.add_argument('-t','--target', required=False, type=str, help="target MAC address")
     parser.add_argument('-l','--listexploits', required=False, action='store_true', help="List all exploits yes/no")
+    parser.add_argument('-i','--info', required=False, nargs='+', default=[], type=str, help="List info for all given exploits (index)")
     parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check availability of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
     parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits by index or name (--exclude exploit1, exploit2)")
@@ -348,6 +373,8 @@ def main():
         expRunner.hardwareEngine.check_hardware()
     elif args.flashhardware:
         expRunner.hardwareEngine.flash_hardware(args.flashhardware)
+    elif args.info:
+        expRunner.print_exploit_info(args.info)
     elif args.target:
         expRunner.target = args.target
         if args.withinput:

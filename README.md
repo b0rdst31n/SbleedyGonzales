@@ -97,13 +97,14 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
 ## Usage
 
 ```console
-usage: sbleedy [-h] [-l] [-chw] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-in EXPLOITS [EXPLOITS ...]] [-wi] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-fh HARDWARE] [-v] ...
+usage: sbleedy [-h] [-l] [-chw] [-fhw HARDWARE] [-i EXPLOITS] [-t TARGET] [-ct] [-ex EXCLUDEEXPLOITS [EXCLUDEEXPLOITS ...]] [-in EXPLOITS [EXPLOITS ...]] [-wi] [-r] [-re] [-rej] [-hw HARDWARE [HARDWARE ...]] [-v] ...
 
 options:
   -h, --help            show this help message and exit
   -t TARGET, --target TARGET
                         target MAC address
   -l, --listexploits    List exploits or not
+  -i, --info EXPLOITS   Prints information about the given exploit-indexes, e.g. --info 12-15,20
   -ct, --checktarget    Check connectivity and availability of the target
   -ch, --checkpoint     Start from a checkpoint (if one exists for the given target)
   -ex EXPLOITS [EXPLOITS ...], --exclude EXPLOITS [EXPLOITS ...]
