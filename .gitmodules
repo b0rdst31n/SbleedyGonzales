@@ -4,3 +4,6 @@
 [submodule "modules/sweyntooth"]
 	path = modules/sweyntooth
 	url = https://github.com/b0rdst31n/sweyntooth_bluetooth_low_energy_attacks.git
+[submodule "helpers/bluing"]
+	path = helpers/bluing
+	url = https://github.com/b0rdst31n/bluing.git

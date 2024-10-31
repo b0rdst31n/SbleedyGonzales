@@ -2,6 +2,7 @@ import subprocess
 from setuptools import setup, find_packages, Command
 from setuptools.command.install import install
 from subprocess import check_call
+import os
 
 class InitSubmodules(Command):
     """Custom command to initialize and update git submodules."""
@@ -25,6 +26,18 @@ class InitSubmodules(Command):
             else:
                 print(f"Error: {pybluez_path} directory not found.")
                 exit(1)
+            
+            os.chdir("../")
+            bluing_path = 'bluing'
+            if os.path.isdir(bluing_path):
+                os.chdir(bluing_path)
+                env = os.environ.copy()
+                env["CFLAGS"] = "-lm"
+                subprocess.check_call(['pip', 'install', '.'], env=env)
+                os.chdir("../../")
+            else:
+                print(f"Error: {bluing_path} directory not found.")
+                exit(1)
         except subprocess.CalledProcessError as e:
             print(f"Error during submodule initialization or installation: {e}")
             exit(1)
@@ -34,7 +47,6 @@ class CustomInstallCommand(install):
     def run(self):
         self.run_command('init_submodules') 
         install.run(self) 
-        check_call(['pip', 'install', 'bluing', '--no-dependencies'])
 
 setup(
     name='SbleedyGonzales',

@@ -120,7 +120,7 @@ if [ -d "$VENV_DIR/venv3" ]; then
     echo "Activating venv3..."
     source "$VENV_DIR/venv3/bin/activate"
     echo "Installing dependencies with pip in venv3..."
-    pip install .
+    python setup.py install && pip install .
     deactivate
     echo "Dependencies installed in venv3."
 fi

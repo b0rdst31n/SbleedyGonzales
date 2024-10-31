@@ -75,7 +75,7 @@ Sbleedy Gonzales includes various BLE-related exploits, such as:
       For Python 3.10 environment (in `venv3`):
 
       ```bash
-      pip install .
+      python setup.py install && pip install .
       ```
 
       For Python 2.7 (in `venv2`):
