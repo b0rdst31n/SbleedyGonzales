@@ -169,7 +169,7 @@ class SbleedyEngine:
             return int(output2), output3    
         except Exception as e:
             logging.info("SbleedyEngine.process_raw_data -> Error during extracting information from the regex " + str(e))
-            return const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED, "Error during extracting information from the regex"
+            return const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED, "Error during extracting information from the regex (probably no SBLEEDY_GONZALES DATA found)"
         
     def process_additional_parameters(self, parameters: list) -> dict:
         logging.info("SbleedyEngine.process_additional_parameters -> list parameters " + str(parameters))

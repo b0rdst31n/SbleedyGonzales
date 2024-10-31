@@ -305,7 +305,7 @@ def main():
     parser = argparse.ArgumentParser(description="SbleedyGonzales CLI tool")
     parser.add_argument('-t','--target', required=False, type=str, help="target MAC address")
     parser.add_argument('-l','--listexploits', required=False, action='store_true', help="List all exploits yes/no")
-    parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check availability and get basic info of the target")
+    parser.add_argument('-ct','--checktarget', required=False, action='store_true',  help="Check availability of the target")
     parser.add_argument('-ch','--checkpoint',  required=False, action='store_true', help="Start from a checkpoint")
     parser.add_argument('-ex','--exclude', required=False, nargs='+', default=[], type=str, help="Exclude exploits by index or name (--exclude exploit1, exploit2)")
     parser.add_argument('-in', '--include', required=False, nargs='+', default=[], type=str, help="Only run specific exploits (index or name) (--include exploit1, exploit2), --exclude is not taken into account")
@@ -379,8 +379,6 @@ def main():
             print("\nChecking device availability, Bluetooth version and profile...")
             if check_availability(args.target):
                 print("The device is available.")
-                print(f"Bluetooth Version of target device: {expRunner.recon.determine_bluetooth_version(args.target)}")
-                print(f"BT Profile: {expRunner.recon.check_bt_profile(args.target)}")
             else:
                 print("The device is not available.")
         else:

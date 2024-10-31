@@ -118,7 +118,7 @@ options:
                         Scan only for provided exploits based on hardware --hardware hardware1 hardware2; --exclude and --exploit are not taken into account
   -chw, --checkhardware Check for connected hardware
   -fhw, --flashhardware HARDWARE
-                        Flash firmware onto connected hardware (e.g. -fh nRF52840), get hardware names with -chw
+                        Flash firmware onto connected hardware (e.g. -fhw nRF52840), get hardware names with -chw
   -v, --verbose         Verbosity on/off (additional output during exploit execution in terminal), Regardless of this flag the output is always saved in results/{target}/exploit_output.log
 
 EXAMPLES:
