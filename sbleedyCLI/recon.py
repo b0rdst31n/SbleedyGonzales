@@ -46,7 +46,7 @@ class Recon():
         f.write(f"Bluetooth Profile: {bt_profile}\n")
         print(f"Bluetooth Profile: {bt_profile}")
         bt_manufacturer = self.determine_manufacturer(target)
-        f.write(f"Bluetooth Manufacturer: {bt_manufacturer}\n")
+        f.write(f"Manufacturer {bt_manufacturer}\n")
         print(f"Manufacturer {bt_manufacturer}")
         f.close()
     
@@ -174,7 +174,7 @@ class Recon():
         else:
             return capabilities.pop()
 
-def get_device_info(self, target):
+def get_device_info(target):
     file_path = Path(const.DEVICE_INFO.format(target=target))
     if file_path.is_file():
         with file_path.open('r') as f:

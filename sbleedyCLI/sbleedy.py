@@ -267,11 +267,6 @@ class Sbleedy():
         while True:
             yield next(spinner)
     
-    def generate_report(self, target):
-        table = self.report.generate_report(target=target)
-        console = Console()
-        console.print(table)
-    
     def generate_machine_readable_report(self, target):
         self.report.generate_machine_readable_report(target=target)
     
@@ -396,7 +391,7 @@ def main():
             if args.recon:
                 expRunner.recon.run_recon(args.target)
             elif args.report:
-                expRunner.generate_report(args.target)
+                expRunner.report.generate_report(args.target)
             elif args.reportjson:
                 expRunner.generate_machine_readable_report(args.target)
             elif args.checkpoint:

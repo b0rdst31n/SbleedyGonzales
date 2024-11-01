@@ -6,6 +6,8 @@ from tabulate import tabulate
 from colorama import Fore, Back, Style, init
 from pathlib import Path
 from rich.table import Table
+from rich import box
+from rich.console import Console
 
 import sbleedyCLI.constants as const
 from sbleedyCLI.recon import get_device_info
@@ -63,7 +65,7 @@ class Report:
 
     def get_done_exploits(self, target):
         path = Path(const.OUTPUT_DIRECTORY.format(target=target))
-        exploits = [entry.stem for entry in path.iterdir() if entry.is_file() and entry.suffix == '.json' and not entry.stem.startswith('.checkpoint') and entry.stem not in const.SKIP_DIRECTORIES]
+        exploits = [entry.stem for entry in path.iterdir() if entry.is_file() and entry.suffix == '.json' and not entry.stem.startswith(('.checkpoint', 'whole_report')) and entry.stem not in const.SKIP_DIRECTORIES]
         logging.info("Extracted following completed exploits: " + str(exploits))
         return exploits
 
@@ -76,8 +78,7 @@ class Report:
         logging.info("Report.generate_report -> all_exploits = " + str(all_exploits))
         logging.info("Report.generate_report -> skipped_exploits = " + str(skipped_exploits))
 
-        headers = ['Index', 'Exploit', 'Result', 'Data', 'CVE']
-        index = 1
+        headers = ['Exploit', 'Result', 'Data', 'CVE']
         sorted_done_exploits = sorted(done_exploits, key=lambda x: x[2])
 
         print("\n")
@@ -101,27 +102,25 @@ class Report:
                 symbol = '⚠'
             
             if code == const.RETURN_CODE_VULNERABLE:
-                table.add_row(str(index), f"[red]{exploit}[/red]", f"[red]Vulnerable {symbol}[/red]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+                table.add_row(f"[red]{exploit}[/red]", f"[red]Vulnerable {symbol}[/red]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_NOT_VULNERABLE:
-                table.add_row(str(index), f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+                table.add_row(f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_ERROR:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_UNDEFINED:
-                table.add_row(str(index), f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+                table.add_row(f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             elif code == const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
             else:
-                table.add_row(str(index), f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error during report generation {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-        
-            index += 1
+                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error during report generation {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
 
         for skipped_exploit in skipped_exploits:
-            table.add_row(str(index), f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
-            index += 1
+            table.add_row(f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
 
         logging.info("Report.generate_report -> table_data created")
 
-        return table
+        console = Console()
+        console.print(table)
 
     def generate_machine_readable_report(self, target):
         done_exploits = self.get_done_exploits(target=target)
@@ -132,7 +131,6 @@ class Report:
         logging.info("Report.generate_report -> all_exploits = " + str(all_exploits))
         logging.info("Report.generate_report -> skipped_exploits = " + str(skipped_exploits))
 
-        index = 1
         sorted_done_exploits = sorted(done_exploits, key=lambda x: x[2])
 
         output_json = {}
@@ -145,22 +143,18 @@ class Report:
                 data = "Error during loading the report"
             logging.info("data - " + str(data))
             sorted_done_exploits_json.append({
-                "index": index,
                 "name":exploit,
                 "code": code,
                 "data": data,
                 "cve": cve 
             })
-            index += 1
         for skipped_exploit in skipped_exploits:
             skipped_exploits_json.append({
-                "index": index,
                 "name": skipped_exploit,
                 "code": 6,
                 "data": "Not tested",
                 "cve": ""
             })
-            index += 1
         
         output_json["done_exploits"] = sorted_done_exploits_json
         output_json["skipped_exploits"] = skipped_exploits_json
@@ -175,6 +169,8 @@ class Report:
         jsonfile = open(const.MACHINE_READABLE_REPORT_OUTPUT_FILE.format(target=target), 'w')
         json.dump(output_json, jsonfile, indent=6)
         jsonfile.close()
+        
+        print(f"\nReport saved to {jsonfile.name}")
 
 if __name__ == "__main__":
     pass 
