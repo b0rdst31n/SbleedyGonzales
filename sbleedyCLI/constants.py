@@ -38,7 +38,7 @@ HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
 REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY_GONZALES DATA:.*"
 REGEX_EXPLOIT_OUTPUT_DATA_CODE = b" code=[0-4],"
 REGEX_EXPLOIT_OUTPUT_DATA_DATA = b", data=.*"
-MAX_CHARS_DATA_TRUNCATION = 100
+MAX_CHARS_DATA_TRUNCATION = 200
 
 COMMAND_CONNECT = TOOL_DIRECTORY + "/helpers/reconnect.sh {target}"
 REGEX_COMMAND_CONNECT = "Device {target} Connected: yes"

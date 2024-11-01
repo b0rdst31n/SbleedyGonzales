@@ -54,6 +54,8 @@ def find_and_extract_data(target, data):
                     if s.startswith(key):
                         if s.split(key)[1].strip() == 'True':
                             data[entry_to_data[key]] = 1
+                        elif s.split(key)[1].strip() == 'False':
+                            data[entry_to_data[key]] = 0
     except FileNotFoundError as e:
         logging.info("No file {} found. ".format(lmp_file))
         print("No file {} found. ".format(lmp_file) + ". Please run a recon script first: sbleedy -t {} -r ".format(target) + ". If you already did that, then first pair your attack device with the target, and run a recon script again. If fails -> open an issue on github")
@@ -63,7 +65,7 @@ def find_and_extract_data(target, data):
     return data
 
 
-def evaluate_data_sc(target, data=[0,0,0,0,0,0,0,0]):
+def evaluate_data_sc(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
         logging.info("Prerequisites for lmp_file are not satisfied. exiting")
         print("There is no lmp file from recon script. Please run a recon script first: sbleedy -t {} -r ".format(target) + ". If you already did that, then first pair your attack device with the target, and run a recon script again. If fails -> open an issue on github")
@@ -72,14 +74,16 @@ def evaluate_data_sc(target, data=[0,0,0,0,0,0,0,0]):
     
     data = find_and_extract_data(target, data)
 
-    if data[entry_to_data[SC_SUP_C]] and data[entry_to_data[SC_SUP_H]]:
+    if data[entry_to_data[SC_SUP_C]] == -1 or data[entry_to_data[SC_SUP_H]] == -1:
+        report_error("There are required fields missing in the lmp file.")
+    elif data[entry_to_data[SC_SUP_C]] and data[entry_to_data[SC_SUP_H]]:
         # Supports SC okay
         report_not_vulnerable("Secure Connections supported")
     else:
         report_vulnerable("No Secure Connections supported")
 
 
-def evaluate_data_le_support(target, data=[0,0,0,0,0,0,0,0]):
+def evaluate_data_le_support(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
         logging.info("Prerequisites for lmp_file are not satisfied. exiting")
         print("There is no lmp file from recon script. Please run a recon script first: sbleedy -t {} -r ".format(target) + ". If you already did that, then first pair your attack device with the target, and run a recon script again. If fails -> open an issue on github")
@@ -88,18 +92,21 @@ def evaluate_data_le_support(target, data=[0,0,0,0,0,0,0,0]):
     
     data = find_and_extract_data(target, data)
 
-    # LE not supported
-    if data[entry_to_data[LE_SUP_C]] and data[entry_to_data[LE_SUP_H]]:
+    if data[entry_to_data[LE_SUP_C]] == -1 or data[entry_to_data[LE_SUP_H]] == -1 or data[entry_to_data[SIM_LE_BR_C]] == -1 or data[entry_to_data[SIM_LE_BR_H]] == -1:
+        report_error("There are required fields missing in the lmp file.")
+    elif data[entry_to_data[LE_SUP_C]] and data[entry_to_data[LE_SUP_H]]:
         # LE supported 
         if data[entry_to_data[SIM_LE_BR_C]] and data[entry_to_data[SIM_LE_BR_H]]:
             # Simultaneous LE BR/EDR supported
             # Try testing BLUR
             report_vulnerable("Possibly vulnerable to BLUR, needs testing")
-            return
-    report_not_vulnerable("No LE supported, Cross transport attacks are not going to work")
+        else:
+            report_not_vulnerable("No simultaneous LE BR/EDR supported, Cross transport attacks are not going to work")
+    else:
+        report_not_vulnerable("No LE supported, Cross transport attacks are not going to work")
 
 
-def evaluate_data_ssp(target, data=[0,0,0,0,0,0,0,0]):
+def evaluate_data_ssp(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
         logging.info("Prerequisites for lmp_file are not satisfied. exiting")
         print("There is no lmp file from recon script. Please run a recon script first: sbleedy -t {} -r ".format(target) + ". If you already did that, then first pair your attack device with the target, and run a recon script again. If fails -> open an issue on github")
@@ -109,6 +116,9 @@ def evaluate_data_ssp(target, data=[0,0,0,0,0,0,0,0]):
     data = find_and_extract_data(target, data)
     
     logging.info("ssp check -> data -> " + str(data))
+    
+    if data[entry_to_data[SSP_SUP_C]] == -1 or data[entry_to_data[SSP_SUP_H]] == -1:
+        report_error("There are required fields missing in the lmp file.")
 
     if data[entry_to_data[SSP_SUP_C]] and data[entry_to_data[SSP_SUP_H]]:
         # SSP supported
