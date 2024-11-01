@@ -8,6 +8,7 @@ from pathlib import Path
 from rich.table import Table
 
 import sbleedyCLI.constants as const
+from sbleedyCLI.recon import get_device_info
 from sbleedyCLI.engines.exploitEngine import ExploitEngine
 
 REPORT_OUTPUT_FILE = os.path.join(const.OUTPUT_DIRECTORY, "{exploit}.json")
@@ -121,15 +122,6 @@ class Report:
         logging.info("Report.generate_report -> table_data created")
 
         return table
-    
-    def get_bt_version(self, target) -> float:
-        file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
-        if file_path.is_file():
-            with file_path.open('r') as f:
-                text = f.read()
-                mm = re.compile(const.REGEX_BT_VERSION)
-                output = mm.search(text).group()
-                return float(output.split(" ")[3])
 
     def generate_machine_readable_report(self, target):
         done_exploits = self.get_done_exploits(target=target)
@@ -173,22 +165,16 @@ class Report:
         output_json["done_exploits"] = sorted_done_exploits_json
         output_json["skipped_exploits"] = skipped_exploits_json
         output_json['manually_added_exploits'] = list()
-        output_json["bt_version"] = self.get_bt_version(target=target)
-        output_json['manufacturer'] = get_manufacturer(target=target)
         output_json['mac_address'] = target
+        
+        version, profile, manufacturer = get_device_info(target)
+        output_json["bt_version"] = version
+        output_json["bt_profile"] = profile
+        output_json['manufacturer'] = manufacturer
         
         jsonfile = open(const.MACHINE_READABLE_REPORT_OUTPUT_FILE.format(target=target), 'w')
         json.dump(output_json, jsonfile, indent=6)
         jsonfile.close()
-
-def get_manufacturer(target) -> str:
-    file_path = Path(const.RECON_DIRECTORY.format(target=target) + const.BLUING_BR_LMP[1])
-    if file_path.is_file():
-        with file_path.open('r') as f:
-            text = f.read()
-            mm = re.compile(const.REGEX_BT_MANUFACTURER)
-            output = mm.search(text).group()
-            return output.split(":")[1].strip()
 
 if __name__ == "__main__":
     pass 

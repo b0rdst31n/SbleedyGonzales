@@ -19,8 +19,8 @@ from .engines.exploitEngine import ExploitEngine
 from .engines.hardwareEngine import HardwareEngine
 from .engines.sbleedyEngine import SbleedyEngine
 from sbleedyCLI.engines.connectionEngine import check_availability
-from .recon import Recon
-from .report import Report, get_manufacturer
+from .recon import Recon, get_device_info
+from .report import Report
 from .checkpoint import Checkpoint
 
 class Sbleedy():
@@ -168,12 +168,6 @@ class Sbleedy():
             print("Invalid input")
             self.connection_lost()
     
-    def run_recon(self, target):
-        self.recon.run_recon(target)
-        print(f"Bluetooth Version of target device: {self.recon.determine_bluetooth_version(target)}")
-        print(f"BT Profile: {self.recon.check_bt_profile(target)}")
-        print(f"Bluetooth Manufacturer: {get_manufacturer(target)}")
-    
     def start_from_cli_all(self, target, parameters) -> None:
         logging.info("start_from_cli_all -> Target: {}".format(target))
 
@@ -212,22 +206,19 @@ class Sbleedy():
             exploits = [exploit for exploit in exploits if exploit.mass_testing]
             logging.info("There are {} exploits to work on".format(len(exploits)))
 
-        version = self.recon.determine_bluetooth_version(target)
+        version, profile, manufacturer = get_device_info(target)
         if version is not None:
             print(f"Skipping all exploits that do not apply to the Bluetooth version of the target: {version}")
             logging.info(f"Target Bluetooth version: {version}. Skipping all exploits that do not apply to this version.")
             exploits = [exploit for exploit in exploits if float(exploit.bt_version_min) <= float(version) and float(version) <= float(exploit.bt_version_max)]
             logging.info("There are {} exploits to work on".format(len(exploits)))
         
-        bt_profile = self.recon.check_bt_profile(target)
-        if bt_profile is not None:
-            print(f"Skipping all exploits that do not apply to the Bluetooth profile of the target: {bt_profile}")
-            logging.info(f"Target Bluetooth profile: {bt_profile}. Skipping all exploits that do not apply to this profile.")
-            cleaned_bt_profile = re.sub(r'\s*\(.*?\)', '', bt_profile).strip()
-            profile_list = [profile.strip() for profile in cleaned_bt_profile.split('+')]
-            exploits = [exploit for exploit in exploits if exploit.profile in profile_list or exploit.profile == cleaned_bt_profile]
+        if profile is not None:
+            print(f"Skipping all exploits that do not apply to the Bluetooth profile of the target: {profile}")
+            logging.info(f"Target Bluetooth profile: {profile}. Skipping all exploits that do not apply to this profile.")
+            exploits = [exploit for exploit in exploits if profile in exploit.profile or exploit.profile in profile]
             logging.info("There are {} exploits to work on".format(len(exploits)))
-        
+
         if any([exploit for exploit in exploits if "sweyntooth" in exploit.name]):
             print("[i] Please make sure that Sweyntooth firmware is on the nRF dongle (run sbleedy -fhw nRF52840)")
         
@@ -403,7 +394,7 @@ def main():
                 print("The device is not available.")
         else:
             if args.recon:
-                expRunner.run_recon(args.target)
+                expRunner.recon.run_recon(args.target)
             elif args.report:
                 expRunner.generate_report(args.target)
             elif args.reportjson:

@@ -74,16 +74,6 @@ def check_availability(target):
         print("[i] The device can't be found by Bleak (LE Scanner). Trying L2Ping now...")
         return check_availability_bredr(target)
 
-def check_target(self, target):
-    cont = True
-    while cont:
-        for i in range(10):
-            available = check_availability(target)
-            if available:
-                return True
-        if not available:
-            inp = self.connection_lost()
-
 def check_connectivity_classic(target):
     try:
         proc_out = subprocess.check_output(const.COMMAND_CONNECT.format(target=target), shell=True, stderr=subprocess.STDOUT)

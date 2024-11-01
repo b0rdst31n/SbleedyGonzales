@@ -11,6 +11,7 @@ FIRMWARE_DIRECTORY = HARDWARE_DIRECTORY + 'firmware/'
 OUTPUT_DIRECTORY = TOOL_DIRECTORY + '/results/{target}/'
 EXPLOIT_LOG_FILE = OUTPUT_DIRECTORY + 'exploit_output.log'
 RECON_DIRECTORY = OUTPUT_DIRECTORY + 'recon/'
+DEVICE_INFO = RECON_DIRECTORY + 'basic_info.log'
 MACHINE_READABLE_REPORT_OUTPUT_FILE = OUTPUT_DIRECTORY + 'whole_report.json'
 VENV2_PATH = TOOL_DIRECTORY + '/venv2/bin/'
 SKIP_DIRECTORIES = ['recon']
@@ -31,15 +32,13 @@ LESCAN = "sudo hcitool lescan"
 L2PING = "sudo l2ping -c 10 {target}"
 BLUING_BR_SDP = ("sudo $(which bluing) br --sdp {target}", "bluing_sdp.log")
 BLUING_BR_LMP = ("sudo $(which bluing) br --lmp-features {target}", "bluing_lmp.log")
+BLUING_LE_SCAN = ("sudo $(which bluing) le --scan", "bluing_le.log")
 HCITOOL_INFO = ("sudo hcitool info {target}", "hciinfo.log")
-REGEX_BT_VERSION = r"Bluetooth Core Specification [0-9]{1}(\.){0,1}[0-9]{0,1}\ "
-REGEX_BT_VERSION_HCITOOL = r"\(0x[0-f]{1}\) LMP Subversion:"
-REGEX_BT_MANUFACTURER = r"Manufacturer name: .*\n"
 
 REGEX_EXPLOIT_OUTPUT_DATA = b"SBLEEDY_GONZALES DATA:.*"
 REGEX_EXPLOIT_OUTPUT_DATA_CODE = b" code=[0-4],"
 REGEX_EXPLOIT_OUTPUT_DATA_DATA = b", data=.*"
-MAX_CHARS_DATA_TRUNCATION = 80
+MAX_CHARS_DATA_TRUNCATION = 100
 
 COMMAND_CONNECT = TOOL_DIRECTORY + "/helpers/reconnect.sh {target}"
 REGEX_COMMAND_CONNECT = "Device {target} Connected: yes"
