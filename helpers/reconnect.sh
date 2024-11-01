@@ -1,18 +1,29 @@
 #!/bin/bash
 
-mac=$1 
+# Check if MAC address is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <MAC_ADDRESS>"
+    exit 1
+fi
 
-# turn on bluetooth in case it's off
+MAC_ADDRESS=$1
+
+# Ensure Bluetooth is unblocked and active
 rfkill unblock bluetooth
+sudo service bluetooth restart
+sudo hciconfig hci0 up
 
+# Start bluetoothctl process to configure and connect
 bluetoothctl -- power on
 bluetoothctl -- discoverable on
 bluetoothctl -- pairable on
-bluetoothctl -- agent NoInputNoOutput    # if you delete this part it will pair as normal, one would need to accept pairing only on the device (test)
+bluetoothctl -- agent NoInputNoOutput
 bluetoothctl -- default-agent
-bluetoothctl -- remove $mac
-sudo hcitool info $mac
-bluetoothctl -- trust $mac
-bluetoothctl -- connect $mac
-bluetoothctl -- remove $mac
-bluetoothctl -- disconnect
+bluetoothctl -- remove $MAC_ADDRESS
+bluetoothctl --timeout 5 scan on
+
+bluetoothctl -- trust $MAC_ADDRESS
+bluetoothctl -- connect $MAC_ADDRESS
+
+bluetoothctl -- disconnect $MAC_ADDRESS
+bluetoothctl -- remove $MAC_ADDRESS

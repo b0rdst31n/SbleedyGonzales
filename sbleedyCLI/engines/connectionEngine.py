@@ -78,8 +78,8 @@ def check_connectivity_classic(target):
     try:
         proc_out = subprocess.check_output(const.COMMAND_CONNECT.format(target=target), shell=True, stderr=subprocess.STDOUT)
         print("Successful check - Device connectivity is checked")
+        return True
     except subprocess.CalledProcessError as e:
-        #print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         text = e.output.decode()
         try:
             mm = re.compile(const.REGEX_COMMAND_CONNECT.format(target=target))
@@ -87,7 +87,6 @@ def check_connectivity_classic(target):
             print("Partical check - Device connectivity is checked")
             return True
         except AttributeError as e:
-            print("Device is offline")
+            print("Device is not found")
         return False
-    #print("Connectability- True")
-    return True
+    
