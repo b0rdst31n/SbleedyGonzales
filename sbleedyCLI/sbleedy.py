@@ -395,10 +395,11 @@ def main():
             logging.info("Provided --exclude parameter -> " + str(args.exclude))
 
         if args.checktarget:
-            print("\nChecking device availability, Bluetooth version and profile...")
-            if check_availability(args.target):
+            print("\nChecking device availability...")
+            availability = check_availability(args.target)
+            if availability is True:
                 print("The device is available.")
-            else:
+            elif availability is False:
                 print("The device is not available.")
         else:
             if args.recon:

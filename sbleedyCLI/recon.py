@@ -1,13 +1,8 @@
 import subprocess
-import argparse
 import re
-import os
 import logging
 import time
-import signal
 from pathlib import Path
-import asyncio
-from bleak import BleakScanner
 
 from sbleedyCLI.engines.connectionEngine import check_connectivity_classic
 import sbleedyCLI.constants as const
@@ -49,14 +44,14 @@ class Recon():
             print("Please note: when running the recon script once for the target, the version and profile checks will be much faster.")
             try:
                 result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                if result.returncode != 0:
-                    print(f"[!] BT Version Check - Error: {result.stderr.strip()}")
-                    return None
-                mm = re.compile(const.REGEX_BT_VERSION)
-                output = mm.search(result.stdout).group()
-                return float(output.split(" ")[3])
-            except Exception as e:
-                print(f"[!] BT Version Check - Error: {str(e)}")
+                if result.returncode == 0:
+                    mm = re.compile(const.REGEX_BT_VERSION)
+                    output = mm.search(result.stdout).group()
+                    return float(output.split(" ")[3])
+                print("[!] BT Version Check - Error")
+                return None
+            except Exception:
+                print("[!] BT Version Check - Error")
                 return None 
 
     def check_bt_profile(self, target) -> str: 
@@ -68,11 +63,11 @@ class Recon():
             try:
                 result = subprocess.run(const.BLUING_BR_LMP[0].format(target=target), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 if result.returncode != 0:
-                    print(f"[!] BT Profile Check - Error: {result.stderr.strip()}")
+                    print("[!] BT Profile Check - Error")
                     return None
                 output = result.stdout
-            except Exception as e:
-                print(f"[!] BT Profile Check - Error: {str(e)}")
+            except Exception:
+                print("[!] BT Profile Check - Error")
                 return None 
 
         br_edr_supported = None
@@ -144,7 +139,6 @@ class Recon():
             logging.info("recon.py -> got only 1 capability " + str(capabilities))
             return capabilities.pop()
         capabilities.remove('NoInputNoOutput')
-        capability = None
         if len(capabilities) == 0:
             return "NoInputNoOutput"
         else:

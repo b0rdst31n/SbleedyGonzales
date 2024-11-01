@@ -45,9 +45,6 @@ def check_hci_device():
         return False
 
 async def check_availability_le(target):
-    if not check_hci_device():
-        return False
-
     subprocess.run(["sudo", "rfkill", "unblock", "bluetooth"], check=True)
     subprocess.run(["sudo", "systemctl", "restart", "bluetooth"], check=True)
     subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
@@ -69,6 +66,8 @@ def check_availability_bredr(target):
         return False
 
 def check_availability(target):
+    if not check_hci_device():
+        return
     if asyncio.run(check_availability_le(target)):
         return True
     else:
