@@ -82,7 +82,7 @@ class Report:
         sorted_done_exploits = sorted(done_exploits, key=lambda x: x[2])
 
         print("\n")
-        table = Table(title="Exploit Report")
+        table = Table(title="Exploit Report", padding=[0,1,1,1])
 
         for header in headers:
             table.add_column(header, justify="center")

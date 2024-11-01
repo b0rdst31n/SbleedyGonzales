@@ -111,7 +111,7 @@ class Sbleedy():
         available_exploits = sorted(available_exploits, key=lambda x: x.name)
 
         print("\n")
-        table = Table(title="Available Exploits")
+        table = Table(title="Available Exploits", padding=[0,1,1,1])
         table.add_column("Index", justify="center", style="cyan", no_wrap=True)
         table.add_column("Exploit", style="magenta")
         table.add_column("Type", style="green")
