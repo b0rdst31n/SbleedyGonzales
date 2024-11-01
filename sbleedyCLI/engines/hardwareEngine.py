@@ -79,12 +79,13 @@ class HardwareEngine:
             if 1 <= choice <= len(selected_hardware.firmware):
                 selected_firmware = selected_hardware.firmware[choice-1]
                 firmware_name = list(selected_firmware.keys())[0]
-                print(f"Flashing {hw_name} with firmware {firmware_name} on {selected_hardware.port}...\n")
-                script_path = FLASH_NRF_FILE
-                if not os.access(script_path, os.X_OK):
-                    os.chmod(script_path, os.stat(script_path).st_mode | stat.S_IEXEC)
-                subprocess.run([script_path, selected_hardware.port, selected_firmware[firmware_name]], check=True)
-                return
+                if hw_name == "nRF52840":
+                    print(f"Flashing {hw_name} with firmware {firmware_name} on {selected_hardware.port}...\n")
+                    script_path = FLASH_NRF_FILE
+                    subprocess.run([script_path, selected_hardware.port, selected_firmware[firmware_name]], check=True)
+                    return
+                else:
+                    print(f"Currently there is no flashing script for {hw_name}.")
             else:
                 print(f"Invalid choice.")
         except ValueError:
