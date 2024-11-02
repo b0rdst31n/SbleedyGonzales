@@ -25,9 +25,9 @@ Read the [SbleedyGonzales Wiki-Page](https://github.com/b0rdst31n/SbleedyGonzale
 
 ### Prerequisites
 
-- **Python**: Python 2.7 (for certain exploits) and Python 3.10 (for the CLI tool).
-- **Pip**: Ensure pip is installed for both Python versions
 - **BLE Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
+
+The tool requires Python2.7 and Python3.10, as well as pip for both versions, but everything that is needed can be installed with a script as explained in the next chapter.
 
 ### Step-by-Step Installation
 
