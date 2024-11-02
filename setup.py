@@ -69,7 +69,8 @@ setup(
         'colorama',
         'tabulate',
         'bleak',
-        'pwntools'
+        'pwntools',
+        'pydbus'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

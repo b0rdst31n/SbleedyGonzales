@@ -47,7 +47,15 @@ if ! command -v python3.10 &> /dev/null; then
             liblzma-dev \
             tk-dev \
             libffi-dev \
-            curl
+            curl \
+            bluez-tools \
+            bluez-hcidump \
+            libbluetooth-dev \
+            git \
+            gcc \
+            python3-pip \
+            python3-setuptools \
+            python3-pydbus
 
         # Download Python 3.10 source code from python.org
         PYTHON_VERSION="3.10.0"

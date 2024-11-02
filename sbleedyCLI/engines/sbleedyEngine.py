@@ -66,13 +66,14 @@ class SbleedyEngine:
                     exploit_command.append(target)
             elif param['name'].startswith("port_"):
                 device = param['name'].split("_", 1)[1]
-                port = ports.get(device)
+                device_clean = re.sub(r'[^a-zA-Z0-9]', '', device)
+                port = ports.get(device_clean)
                 if port:  
                     if param['name_required']:
                         if param['parameter_connector'] != " ":
-                            exploit_command.append(param['name'] + param['parameter_connector'] + port)
+                            exploit_command.append(device + param['parameter_connector'] + port)
                         else:
-                            exploit_command.append(param['name'])
+                            exploit_command.append(device)
                             exploit_command.append(port)
                     else:
                         exploit_command.append(port)
