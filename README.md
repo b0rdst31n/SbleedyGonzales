@@ -125,3 +125,5 @@ This framework includes the following PoC implementations for BLE vulnerabilitie
 - Bleedingtooth [BadKarma](https://github.com/google/security-research/security/advisories/GHSA-h637-c88j-47wq), [BadVibes](https://github.com/google/security-research/security/advisories/GHSA-ccx2-w2r4-x649) and [BadChoice](https://github.com/google/security-research/security/advisories/GHSA-7mh3-gq28-gfrq) by Google Security Research
 - [KNOB BLE Attack](https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks/blob/master/extras/knob_tester_ble.py) by Matheus Garbelini
 - BlueBorne [CVE-2017-0785](https://github.com/ojasookert/CVE-2017-0785) and [CVE-2017-0781](https://github.com/ojasookert/CVE-2017-0781) by ojasookert and [CVE-2017-1000251](https://github.com/sgxgsx/blueborne-CVE-2017-1000251) by marcinguy
+- [Keystroke Injection](https://github.com/marcnewlin/hi_my_name_is_keyboard) by Marc Newlin
+- [Custom BlueToolkit Exploits](https://github.com/sgxgsx/BlueToolkit) by sgxgsx
