@@ -13,8 +13,16 @@ import sbleedyCLI.constants as const
 from sbleedyCLI.recon import get_device_info
 from sbleedyCLI.engines.exploitEngine import ExploitEngine
 
-REPORT_OUTPUT_FILE = os.path.join(const.OUTPUT_DIRECTORY, "{exploit}.json")
+EXPLOIT_REPORT_OUTPUT_FILE = os.path.join(const.EXPLOIT_REPORT_OUTPUT_DIRECTORY, "{exploit}.json")
 CLEAN_EXPLOIT_NAME = ""
+
+RETURN_CODE_STATUS = {
+    const.RETURN_CODE_VULNERABLE: ("red", "Vulnerable"),
+    const.RETURN_CODE_NOT_VULNERABLE: ("green", "Not vulnerable"),
+    const.RETURN_CODE_ERROR: ("yellow", "Error"),
+    const.RETURN_CODE_UNDEFINED: ("white", "Undefined"),
+    const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED: ("yellow", "Toolkit error"),
+}
 
 def report_data(code, data):
     logging.info("SBLEEDY_GONZALES DATA: code={code}, data={data}".format(code=code, data=data))
@@ -48,15 +56,15 @@ class Report:
         }
         logging.info("Report - save_data -> document -> " + str(doc))
 
-        jsonfile = open(REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name), 'w')
+        jsonfile = open(EXPLOIT_REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name), 'w')
         json.dump(doc, jsonfile, indent=6)
         jsonfile.close()
 
     def read_data(self, exploit_name, target):
         logging.info("Loading report output data")
-        path = REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name)
+        path = EXPLOIT_REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name)
         if Path(path).exists():
-            jsonfile = open(REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name),)
+            jsonfile = open(EXPLOIT_REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name),)
             doc = json.load(jsonfile)
             logging.info("Report output data is loaded")
             logging.info("Report - read_data -> document -> " + str(doc))
@@ -64,7 +72,7 @@ class Report:
         return None, None, None
 
     def get_done_exploits(self, target):
-        path = Path(const.OUTPUT_DIRECTORY.format(target=target))
+        path = Path(const.EXPLOIT_REPORT_OUTPUT_DIRECTORY.format(target=target))
         exploits = [entry.stem for entry in path.iterdir() if entry.is_file() and entry.suffix == '.json' and not entry.stem.startswith(('.checkpoint', 'whole_report')) and entry.stem not in const.SKIP_DIRECTORIES]
         logging.info("Extracted following completed exploits: " + str(exploits))
         return exploits
@@ -101,18 +109,13 @@ class Report:
             elif code == const.RETURN_CODE_ERROR or code == const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED:
                 symbol = '⚠'
             
-            if code == const.RETURN_CODE_VULNERABLE:
-                table.add_row(f"[red]{exploit}[/red]", f"[red]Vulnerable {symbol}[/red]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-            elif code == const.RETURN_CODE_NOT_VULNERABLE:
-                table.add_row(f"[green]{exploit}[/green]", f"[green]Not vulnerable {symbol}[/green]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-            elif code == const.RETURN_CODE_ERROR:
-                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-            elif code == const.RETURN_CODE_UNDEFINED:
-                table.add_row(f"[white]{exploit}[/white]", f"[white]Undefined {symbol}[/white]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-            elif code == const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED:
-                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
-            else:
-                table.add_row(f"[yellow]{exploit}[/yellow]", f"[yellow]Toolkit error during report generation {symbol}[/yellow]", data[:const.MAX_CHARS_DATA_TRUNCATION], cve)
+            color, status = RETURN_CODE_STATUS.get(code, ("yellow", "Toolkit error during report generation"))
+            table.add_row(
+                f"[{color}]{exploit}[/{color}]",
+                f"[{color}]{status} {symbol}[/{color}]",
+                data[:const.MAX_CHARS_DATA_TRUNCATION],
+                cve
+            )
 
         for skipped_exploit in skipped_exploits:
             table.add_row(f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
@@ -142,9 +145,11 @@ class Report:
                 code = const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED
                 data = "Error during loading the report"
             logging.info("data - " + str(data))
+            color, status = RETURN_CODE_STATUS.get(code, "Unknown code")
             sorted_done_exploits_json.append({
                 "name":exploit,
                 "code": code,
+                "status": status,
                 "data": data,
                 "cve": cve 
             })
@@ -152,7 +157,8 @@ class Report:
             skipped_exploits_json.append({
                 "name": skipped_exploit,
                 "code": 6,
-                "data": "Not tested",
+                "status": "Not tested",
+                "data": "",
                 "cve": ""
             })
         

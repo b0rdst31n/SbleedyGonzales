@@ -202,5 +202,5 @@ def get_device_info(target):
                     manufacturer = manufacturer_str
             return version, profile, manufacturer
     else:  
-        print("Please run the recon script once for the target to filter exploits based on the bluetooth version and profile.")  
+        print("Please run the recon script once for the target to get the bluetooth version, profile and manufacturer.")  
         return None, None, None
