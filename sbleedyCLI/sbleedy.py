@@ -91,8 +91,7 @@ class Sbleedy():
                 print("=" * width)
                 print(f"PoC Source    : {curr_exploit.poc_source}")
                 if curr_exploit.cve:
-                    cve_link = f"https://cve.mitre.org/cgi-bin/cvename.cgi?name={curr_exploit.cve}"
-                    print(f"CVE           : {curr_exploit.cve} ({cve_link})")
+                    print(f"CVE           : {curr_exploit.cve}")
                 else:
                     print("CVE           : -")
                 print(f"Affected      : {curr_exploit.affected}")
