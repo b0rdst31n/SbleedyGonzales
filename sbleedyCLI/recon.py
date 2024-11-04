@@ -23,10 +23,11 @@ class Recon():
                     if target in section:
                         output = f"Addr:{section}"
                         f.write(output)
+                        f.close()
                         break
             else:
                 f.write(output)
-            f.close()
+                f.close()
         except subprocess.CalledProcessError:
             print(f"Error during running command {command}")
         return False

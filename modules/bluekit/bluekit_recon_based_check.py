@@ -3,7 +3,7 @@ import logging
 
 from pathlib import Path
 
-from sbleedyCLI.constants import RECON_DIRECTORY, BLUING_BR_LMP, LOG_FILE
+from sbleedyCLI.constants import RECON_DIRECTORY, BLUING_BR_LMP, LOG_FILE, DEVICE_INFO
 from sbleedyCLI.constants import RETURN_CODE_NOT_VULNERABLE, RETURN_CODE_VULNERABLE, RETURN_CODE_ERROR
 from sbleedyCLI.report import report_error, report_not_vulnerable, report_vulnerable
 from sbleedyCLI.recon import Recon
@@ -64,6 +64,13 @@ def find_and_extract_data(target, data):
         print("Strange exception happenned")
     return data
 
+def get_bt_version(target):
+    device_info_file = Path(RECON_DIRECTORY.format(target=target) + DEVICE_INFO)
+    version_pattern = r"Bluetooth Version: ([\d.]+|Unknown)"
+    version_match = re.search(version_pattern, output)
+    if version_match:
+        version_str = version_match.group(1)
+        return float(version_str) if version_str != "Unknown" else None
 
 def evaluate_data_sc(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
@@ -82,14 +89,18 @@ def evaluate_data_sc(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     else:
         report_vulnerable("No Secure Connections supported")
 
-
-def evaluate_data_le_support(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
+def evaluate_data_blur(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
         logging.info("Prerequisites for lmp_file are not satisfied. exiting")
         print("There is no lmp file from recon script. Please run a recon script first: sbleedy -t {} -r ".format(target) + ". If you already did that, then first pair your attack device with the target, and run a recon script again. If fails -> open an issue on github")
         report_error("There is no lmp file from recon script")
         return
     
+    version = get_bt_version(target)
+    if version is not None and version < 4.2:
+        report_not_vulnerable("Target device doesn't use Bluetooth 4.2+")
+        return
+
     data = find_and_extract_data(target, data)
 
     if data[entry_to_data[LE_SUP_C]] == -1 or data[entry_to_data[LE_SUP_H]] == -1 or data[entry_to_data[SIM_LE_BR_C]] == -1 or data[entry_to_data[SIM_LE_BR_H]] == -1:
@@ -99,12 +110,11 @@ def evaluate_data_le_support(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
         if data[entry_to_data[SIM_LE_BR_C]] and data[entry_to_data[SIM_LE_BR_H]]:
             # Simultaneous LE BR/EDR supported
             # Try testing BLUR
-            report_vulnerable("Possibly vulnerable to BLUR, needs testing")
+            report_vulnerable("Possibly vulnerable to BLUR (device supports BT 4.2+ and simultaneous LE BR/EDR), needs testing")
         else:
             report_not_vulnerable("No simultaneous LE BR/EDR supported, Cross transport attacks are not going to work")
     else:
         report_not_vulnerable("No LE supported, Cross transport attacks are not going to work")
-
 
 def evaluate_data_ssp(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
@@ -156,7 +166,7 @@ if __name__ == '__main__':
     if args.target and args.case:
         logging.info("case -> " + str(args.case))
         if args.case == 3:
-            evaluate_data_le_support(args.target)
+            evaluate_data_blur(args.target)
         elif args.case == 1:
             evaluate_data_sc(args.target)
         elif args.case == 2:
