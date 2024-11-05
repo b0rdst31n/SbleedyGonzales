@@ -52,12 +52,13 @@ class HardwareEngine:
     
     def flash_hardware(self, hw_name):
         available_hardware = self.get_all_hardware_profiles()
-        if not any(av.name == hw_name for av in available_hardware):
+        hardware = next((hw for hw in available_hardware if hw.name == hw_name), None)
+        if not hardware:
             print(f"\nHardware {hw_name} not known. Valid names: {', '.join(av.name for av in available_hardware)}")
             return
 
-        hardware_verified = self.verify_setup_multiple_hardware(available_hardware)
-        if not hardware_verified[hw_name]:
+        hardware_verified = self.verify_setup(hardware)
+        if not hardware_verified:
             print(f"\nHardware {hw_name} not available.")
             return
 
@@ -83,6 +84,10 @@ class HardwareEngine:
                     print(f"Flashing {hw_name} with firmware {firmware_name} on {selected_hardware.port}...\n")
                     script_path = FLASH_NRF_FILE
                     subprocess.run([script_path, selected_hardware.port, selected_firmware[firmware_name]], check=True)
+                    return
+                elif hw_name == "microbit":
+                    result = subprocess.run(selected_firmware[firmware_name].split(), capture_output=True, text=True)
+                    print(result.stdout)
                     return
                 else:
                     print(f"Currently there is no flashing script for {hw_name}.")
@@ -173,16 +178,14 @@ class HardwareEngine:
     @staticmethod
     def check_setup_microbit(hardware) -> bool:
         print("\nChecking for Micro:Bit...")
-        result = subprocess.run(["btlejack", "-i"], capture_output=True, text=True)
-        
-        if "No sniffer found" in result.stdout:
-            print("Microbit not found, please make sure that it is mounted.")
-            return False
-        elif "Flashed" in result.stdout:
-            print("Microbit found and flashed successfully.\n[i] Please make sure the device is mounted again after flashing.")
-            return True
-        else:
-            return False
+        mount_output = subprocess.check_output('mount').splitlines()
+        mounted_volumes = [x.split()[2] for x in mount_output]
+        for volume in mounted_volumes:
+            if re.match(b'.*MICROBIT[0-9]*$', volume):
+                print("Micro:Bit found.")
+                return True
+        print("Microbit not found, please make sure that it is mounted.")
+        return False
 
 # Add your hardware verification function
 hardware_verifier = {

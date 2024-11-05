@@ -1,4 +1,5 @@
 name: "microbit"
 description: "BBC Micro:Bit"
 needs_setup_verification: true
-firmware: ""
+firmware:
+  - "Btlejack": "btlejack -i"
