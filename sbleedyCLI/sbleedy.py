@@ -4,8 +4,6 @@ import sys
 import argparse
 import logging
 import signal
-import itertools
-import threading
 import time
 import re
 import textwrap
@@ -238,25 +236,7 @@ class Sbleedy():
         print(f"Currently running {current_exploit.name}... ", end="")
         sys.stdout.flush()
 
-        stop_spinner = False
-        def spinner_task():
-            spinner = self.spinning_cursor()
-            while not stop_spinner:
-                sys.stdout.write(next(spinner))  
-                sys.stdout.flush()
-                time.sleep(0.1)  
-                sys.stdout.write('\b')
-
-        spinner_thread = None
-        if not self.engine.verbosity:
-            spinner_thread = threading.Thread(target=spinner_task)
-            spinner_thread.start()
-        try:
-            result = self.engine.run_test(target, current_ports, current_exploit, parameters)
-        finally:
-            if not self.engine.verbosity:
-                stop_spinner = True
-                spinner_thread.join()
+        result = self.engine.run_test(target, current_ports, current_exploit, parameters)
             
         return result
 
@@ -267,11 +247,6 @@ class Sbleedy():
             self.done_exploits.append([exploits[i].name, response_code, data])
             logging.info("Sbleedy.test_one_by_one -> done exploits - " + str(self.done_exploits))
             self.report.save_data(exploit=exploits[i], target=target, data=data, code=response_code)
-    
-    def spinning_cursor(self):
-        spinner = itertools.cycle(['|', '/', '-', '\\'])
-        while True:
-            yield next(spinner)
     
     def generate_machine_readable_report(self, target):
         self.report.generate_machine_readable_report(target=target)

@@ -9,6 +9,8 @@ import subprocess
 import signal
 from pathlib import Path
 import select
+import itertools
+import threading
 
 from sbleedyCLI.models.exploit import Exploit
 from sbleedyCLI.engines.connectionEngine import dos_checker
@@ -91,7 +93,25 @@ class SbleedyEngine:
 
         exploit_command = self.construct_exploit_command(target, ports, current_exploit, parameters, new_directory)
 
-        if_failed, data = self.execute_command(target, exploit_command, current_exploit.name, timeout=current_exploit.max_timeout, directory=new_directory)
+        stop_spinner = False
+        def spinner_task():
+            spinner = self.spinning_cursor()
+            while not stop_spinner:
+                sys.stdout.write(next(spinner))  
+                sys.stdout.flush()
+                time.sleep(0.1)  
+                sys.stdout.write('\b')
+        spinner_thread = None
+
+        if current_exploit.mass_testing and not self.verbosity:
+            spinner_thread = threading.Thread(target=spinner_task)
+            spinner_thread.start()
+        try:
+            if_failed, data = self.execute_command(target, exploit_command, current_exploit, timeout=current_exploit.max_timeout, directory=new_directory)
+        finally:
+            if current_exploit.mass_testing and not self.verbosity:
+                stop_spinner = True
+                spinner_thread.join()
 
         if current_exploit.type == "DoS":
             response_code, data = dos_checker(target)
@@ -101,16 +121,16 @@ class SbleedyEngine:
 
         return response_code, data
         
-    def execute_command(self, target: str, exploit_command: list, exploit_name: str, timeout: int, directory=None) -> tuple:
+    def execute_command(self, target: str, exploit_command: list, exploit: Exploit, timeout: int, directory=None) -> tuple:
         os.chdir(directory)
         logging.info("SbleedyEngine.execute_command -> chdir to {}".format(directory))
 
         data = False, b''
 
         try:
-            self.logger.info("Starting the next exploit - name {} and command {}".format(exploit_name, exploit_command))
+            self.logger.info("Starting the next exploit - name {} and command {}".format(exploit.name, exploit_command))
             with open(const.EXPLOIT_LOG_FILE.format(target=target), "w") as f:
-                f.write(f"\n\nEXPLOIT: {exploit_name}\n")
+                f.write(f"\n\nEXPLOIT: {exploit.name}\n")
 
                 process = subprocess.Popen(exploit_command, stdout=subprocess.PIPE, text=True)
                 start_time = time.time()
@@ -126,7 +146,7 @@ class SbleedyEngine:
                         output_bytes += output.strip().encode()
                         f.write(output.strip() +  "\n")
                         f.flush()
-                        if self.verbosity:
+                        if self.verbosity or not exploit.mass_testing:
                             print(output.strip())
                 
                 process.wait()
@@ -181,3 +201,8 @@ class SbleedyEngine:
 
     def get_parameters_list(self, parameters: list) -> list:
         return [parameters[i] for i in range(0, len(parameters), 2)]
+    
+    def spinning_cursor(self):
+        spinner = itertools.cycle(['|', '/', '-', '\\'])
+        while True:
+            yield next(spinner)

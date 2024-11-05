@@ -70,7 +70,8 @@ setup(
         'tabulate',
         'bleak',
         'pwntools',
-        'pydbus'
+        'pydbus',
+        'btlejack'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

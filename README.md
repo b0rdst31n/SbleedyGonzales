@@ -127,3 +127,4 @@ This framework includes the following PoC implementations for BLE vulnerabilitie
 - BlueBorne [CVE-2017-0785](https://github.com/ojasookert/CVE-2017-0785) and [CVE-2017-0781](https://github.com/ojasookert/CVE-2017-0781) by ojasookert and [CVE-2017-1000251](https://github.com/sgxgsx/blueborne-CVE-2017-1000251) by marcinguy
 - [Keystroke Injection](https://github.com/marcnewlin/hi_my_name_is_keyboard) by Marc Newlin
 - [Custom BlueToolkit Exploits](https://github.com/sgxgsx/BlueToolkit) by sgxgsx
+- [Btlejacking](https://github.com/virtualabs/btlejack) by virtualabs

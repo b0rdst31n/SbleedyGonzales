@@ -157,20 +157,37 @@ class HardwareEngine:
         for i, port in enumerate(ports):
             print(f"{i + 1}: {port.device} with {port.description}")
             try:
-                choice = int(input("Select a port by number: "))
+                choice = int(input("Select a port by number (or 0 for None): "))
                 if 1 <= choice <= len(ports):
                     port = ports[choice - 1]
                     print(f"Selected port: {port.device}")
                     hardware.port = port.device
                     logging.info("HardwareEngine -> check_setup_nRF -> No available port found")
                     return True
+                elif choice == 0:
+                    return False
             except ValueError:
                 print("Invalid input.")
                 return False
+    
+    @staticmethod
+    def check_setup_microbit(hardware) -> bool:
+        print("\nChecking for Micro:Bit...")
+        result = subprocess.run(["btlejack", "-i"], capture_output=True, text=True)
+        
+        if "No sniffer found" in result.stdout:
+            print("Microbit not found, please make sure that it is mounted.")
+            return False
+        elif "Flashed" in result.stdout:
+            print("Microbit found and flashed successfully.\n[i] Please make sure the device is mounted again after flashing.")
+            return True
+        else:
+            return False
 
 # Add your hardware verification function
 hardware_verifier = {
     "hci": HardwareEngine.check_setup_hci,
-    "nRF52840": HardwareEngine.check_setup_nRF
+    "nRF52840": HardwareEngine.check_setup_nRF,
+    "microbit": HardwareEngine.check_setup_microbit
 }
 
