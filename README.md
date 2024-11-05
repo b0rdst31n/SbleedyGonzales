@@ -114,6 +114,7 @@ Run sbleedy and list all available exploits:
    $ sudo sbleedy -l
 
 Documentation is available at the [SbleedyGonzales Wiki](https://github.com/b0rdst31n/SbleedyGonzales/wiki).
+To get the mac address of your target device, there is a helper script available (see Wiki - Helper Scripts).
 ```
 
 ## Credit
