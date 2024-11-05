@@ -228,6 +228,13 @@ class Sbleedy():
             hw.strip(): self.hardwareEngine.get_hardware_port(hw.strip()) 
             for hw in current_exploit.hardware.split(',')
         }
+
+        if not current_exploit.mass_testing:
+            choice = input(f"Are you ready for the non-automated exploit {current_exploit.name}? (y/n) ")
+            if choice.strip().lower() == "n":
+                print(f"[i] Exploit {current_exploit.name} is being skipped.")
+                return 5, "Skipped by user"
+
         print(f"Currently running {current_exploit.name}... ", end="")
         sys.stdout.flush()
 

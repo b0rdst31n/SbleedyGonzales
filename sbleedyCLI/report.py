@@ -22,6 +22,7 @@ RETURN_CODE_STATUS = {
     const.RETURN_CODE_ERROR: ("yellow", "Error"),
     const.RETURN_CODE_UNDEFINED: ("white", "Undefined"),
     const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED: ("yellow", "Toolkit error"),
+    const.RETURN_CODE_NOT_TESTED: {"white", "Not tested"}
 }
 
 def report_data(code, data):
@@ -156,7 +157,7 @@ class Report:
         for skipped_exploit in skipped_exploits:
             skipped_exploits_json.append({
                 "name": skipped_exploit,
-                "code": 6,
+                "code": const.RETURN_CODE_NOT_TESTED,
                 "status": "Not tested",
                 "data": "",
                 "cve": ""
