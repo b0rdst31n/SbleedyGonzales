@@ -56,7 +56,7 @@ class Report:
             "cve": exploit.cve 
         }
         logging.info("Report - save_data -> document -> " + str(doc))
-
+        Path(const.EXPLOIT_REPORT_OUTPUT_DIRECTORY.format(target=target)).mkdir(exist_ok=True, parents=True)
         jsonfile = open(EXPLOIT_REPORT_OUTPUT_FILE.format(target=target, exploit=exploit_name), 'w')
         json.dump(doc, jsonfile, indent=6)
         jsonfile.close()
