@@ -10,9 +10,7 @@ import (
 	"strings"
 	"strconv"
 	"time"
-	"encoding/json"
 	"encoding/binary"
-	"path/filepath"
 
 	"github.com/bettercap/gatt"
 	"github.com/bettercap/gatt/examples/option"
@@ -382,47 +380,6 @@ func onPeriphConnected(p gatt.Peripheral, err error) {
 	//time.Sleep(5 * time.Second)
 }
 
-func save_to_file() {
-	if(handle != "") {
-		return;
-	}
-
-	jsonData, err := json.MarshalIndent(current_services, "", "    ")
-	if err != nil {
-		fmt.Println("Error marshalling to JSON:", err)
-		return
-	}
-
-	filename := fmt.Sprintf("ble_services_%s.json", strings.ReplaceAll(macAddress, ":", ""))
-	workingDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err) 
-		return
-	}
-
-	projectDir := strings.TrimSuffix(workingDir, "gatt")
-	fullPath := filepath.Join(projectDir, "scanned_devices/" + filename)
-
-	if err := os.MkdirAll(projectDir + "scanned_devices/", os.ModePerm); err != nil {
-		fmt.Println("Error creating directory:", err)
-		return
-	}
-
-	f, err := os.Create(fullPath)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return
-	}
-	defer f.Close()
-
-	if _, err = f.Write(jsonData); err != nil {
-		fmt.Println("Error writing to file:", err)
-		return
-	}
-
-	fmt.Printf("Data successfully written to %s\n", fullPath)
-}
-
 func onPeriphDisconnected(p gatt.Peripheral, err error) {
 	if wantsToWrite && !foundToWrite {
 		fmt.Printf("Error: writable characteristic with handle %s not found.", handle)
@@ -431,7 +388,6 @@ func onPeriphDisconnected(p gatt.Peripheral, err error) {
 	}
 
 	fmt.Println("Disconnected")
-	//save_to_file()
 	close(done)
 }
 
