@@ -16,7 +16,7 @@ import (
 
 	"github.com/bettercap/gatt"
 	"github.com/bettercap/gatt/examples/option"
-	"attackable/bleagle/gatt/pretty"
+	"sbleedy/gatt/pretty"
 )
 
 type BLECharacteristic struct {

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -11,13 +10,14 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"path/filepath"
-	"encoding/json"
+	"sort"
+	"regexp"
+	"strconv"
 
 	"github.com/evilsocket/islazy/ops"
 	"github.com/bettercap/gatt"
 	"github.com/bettercap/gatt/examples/option"
-	"attackable/bleagle/gatt/pretty"
+	"sbleedy/gatt/pretty"
 )
 
 var (
@@ -26,6 +26,7 @@ var (
 	colNames = []string{"RSSI", "MAC", "Name", "Vendor", "Flags", "Connectable"}
 	rows = make([][]string, 0)
 	discoveredDevices = make([]BLEDevice, 0)
+	lastUpdateTimes = make(map[string]time.Time)
 )
 
 type BLEDevice struct {
@@ -42,7 +43,7 @@ func onStateChanged(d gatt.Device, s gatt.State) {
 	switch s {
 	case gatt.StatePoweredOn:
 		fmt.Println("scanning...")
-		d.Scan([]gatt.UUID{}, false)
+		d.Scan([]gatt.UUID{}, true)
 		return
 	default:
 		d.StopScanning()
@@ -64,46 +65,44 @@ func colorRSSI(n int) string {
 	return rssi
 }
 
+func extractRSSI(value string) (int, error) {
+	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	cleanedValue := ansiRegex.ReplaceAllString(value, "")
+	cleanedValue = strings.TrimSpace(strings.TrimSuffix(cleanedValue, " dBm"))
+	return strconv.Atoi(cleanedValue)
+}
+
+func updateOrAddRow(rows *[][]string, newRow []string, addressIndex int) {
+	for i, row := range *rows {
+		if row[addressIndex] == newRow[addressIndex] {
+			(*rows)[i] = newRow
+			return
+		}
+	}
+	*rows = append(*rows, newRow)
+}
+
 func onPeriphDiscovered(p gatt.Peripheral, a *gatt.Advertisement, rssi int) {
 	if rssiThreshold != 0 && rssi < rssiThreshold {
 		return // Ignore devices with RSSI below the threshold
 	}
 
-	currDevice := BLEDevice{
-		Mac:       	   p.ID(),
-		Name:          a.LocalName,
-		Vendor:        a.Company,
-		RSSI:          rssi,
-		Flags:         a.Flags.String(),
-		isConnectable: a.Connectable,
-	}
-	discoveredDevices = append(discoveredDevices, currDevice)
+	address := p.ID()
+	currentTime := time.Now()
 
-	/*
-	green := "\033[32m"
-	orange := "\033[38;5;214m"
-	reset := "\033[0m"
-	var output string
-	if a.LocalName != "" {
-		output += fmt.Sprintf("\n%sNew BLE device%s %s%s%s detected as %s ", green, reset, orange, a.LocalName, reset, p.ID())
-	} else {
-		output += fmt.Sprintf("\n%sNew BLE device%s detected as %s", green, reset, p.ID())
-	}
-	if len(a.ManufacturerData) > 0 {
-		companyIdentifier := binary.LittleEndian.Uint16(a.ManufacturerData[0:2])
-		if cname, found := gatt.CompanyIdents[companyIdentifier]; found {
-			output += fmt.Sprintf(" (%s%s%s) ", orange, cname, reset)
+	if lastUpdate, exists := lastUpdateTimes[address]; exists {
+		if currentTime.Sub(lastUpdate) < 5*time.Second {
+			return
 		}
 	}
-	output += fmt.Sprintf("%d dBm.", rssi)
-	fmt.Printf(output)*/
-	//fmt.Print("\033[H\033[2J")
+
+	lastUpdateTimes[address] = currentTime
+
 	cmd := exec.Command("clear")
-    cmd.Stdout = os.Stdout
-    cmd.Run()
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 
 	rssiString := colorRSSI(rssi)
-	address := p.ID()
 	vendor := a.Company
 	if a.Company == "" && a.CompanyID != 0 {
 		a.Company = pretty.CompanyIdents[a.CompanyID]
@@ -111,64 +110,27 @@ func onPeriphDiscovered(p gatt.Peripheral, a *gatt.Advertisement, rssi int) {
 	}
 	isConnectable := ops.Ternary(a.Connectable, pretty.Green("✔"), pretty.Red("✖")).(string)
 
-	rows = append(rows, []string{
+	updateOrAddRow(&rows, []string{
 		rssiString,
 		address,
 		pretty.Yellow(a.LocalName),
 		vendor,
 		a.Flags.String(),
 		isConnectable,
+	}, 1)
+
+	sort.Slice(rows, func(i, j int) bool {
+		rssiI, errI := extractRSSI(rows[i][0])
+		rssiJ, errJ := extractRSSI(rows[j][0])
+		if errI != nil || errJ != nil {
+			return rows[i][0] > rows[j][0]
+		}
+		return rssiI > rssiJ
 	})
 
 	pretty.Table(os.Stdout, colNames, rows)
-	fmt.Print("\nType 'stop' to stop scanning: ")
-}
 
-func save_to_file() {
-	jsonData, err := json.MarshalIndent(discoveredDevices, "", "    ")
-	if err != nil {
-		fmt.Println("Error marshalling to JSON:", err)
-		return
-	}
-
-	workingDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	projectDir := strings.TrimSuffix(workingDir, "gatt")
-	fullPath := filepath.Join(projectDir, "scanned_devices/discovered_devices.json")
-
-	f, err := os.Create(fullPath)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return
-	}
-	defer f.Close()
-
-	if _, err = f.Write(jsonData); err != nil {
-		fmt.Println("Error writing to file:", err)
-		return
-	}
-
-	fmt.Printf("Data successfully written to %s\n", fullPath)
-}
-
-// Goroutine to listen for user input
-func listenForStop(d gatt.Device, done chan bool) {
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("\nType 'stop' to stop scanning")
-		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(input)
-		if input == "stop" {
-			fmt.Println("Stopping scan...")
-			d.StopScanning()
-			scanning = false
-			done <- true
-			break
-		}
-	}
+	time.Sleep(2 * time.Second)
 }
 
 func main() {
@@ -188,8 +150,6 @@ func main() {
 
 	done := make(chan bool)
 
-	go listenForStop(d, done)
-
 	if timeout > 0 {
 		go func() {
 			time.Sleep(time.Duration(timeout) * time.Second)
@@ -201,5 +161,4 @@ func main() {
 	}
 
 	<-done
-	//save_to_file()
 }

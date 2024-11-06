@@ -1,4 +1,4 @@
-module attackable/bleagle/gatt
+module sbleedy/gatt
 
 go 1.13
 
