@@ -8,6 +8,7 @@ venv2/
 venv3/
 
 results/*
+helpers/blueshark/logs/*
 
 modules/bleedingtooth/*
 !modules/bleedingtooth/*.*
