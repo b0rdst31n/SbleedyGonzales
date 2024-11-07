@@ -23,9 +23,6 @@ pip install "pyserial>=3.5" psutil
 Please follow the instructions on <https://github.com/mikeryan/ice9-bluetooth-sniffer>.
 Install the required dependencies, clone the repository and follow the build instructions ('make install' is not necessary).
 After the exe (ice9-bluetooth) is being compiled, copy it to helpers/blueshark.
-```bash
-sudo apt install libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev
-```
 
 ## Usage
 
@@ -65,4 +62,4 @@ sudo apt install libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-
 ## Credit
 
 The SnifferAPI is being provided by <https://www.nordicsemi.com/Products/Development-tools/nrf-sniffer-for-bluetooth-le/download>.
-The HackRF Snoffer is from <https://github.com/mikeryan/ice9-bluetooth-sniffer>.
+The HackRF Sniffer is from <https://github.com/mikeryan/ice9-bluetooth-sniffer>.
