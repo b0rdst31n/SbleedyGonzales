@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
   int hci_socket = hci_open_dev(hci_device_id);
   if (hci_devinfo(hci_device_id, &di) < 0) {
     perror("hci_devinfo");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 

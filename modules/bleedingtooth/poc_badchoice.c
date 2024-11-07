@@ -65,6 +65,7 @@ int make_socket_non_blocking(int sock) {
 int main(int argc, char **argv) {
   if (argc != 2) {
     printf("Usage: %s MAC_ADDR\n", argv[0]);
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Wrong usage\n");
     return 1;
   }
 
@@ -85,6 +86,7 @@ int main(int argc, char **argv) {
   int hci_socket = hci_open_dev(hci_device_id);
   if (hci_devinfo(hci_device_id, &di) < 0) {
     perror("hci_devinfo");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
@@ -94,12 +96,14 @@ int main(int argc, char **argv) {
   hci_filter_all_events(&flt);
   if (setsockopt(hci_socket, SOL_HCI, HCI_FILTER, &flt, sizeof(flt)) < 0) {
     perror("setsockopt(HCI_FILTER)");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
   int opt = 1;
   if (setsockopt(hci_socket, SOL_HCI, HCI_DATA_DIR, &opt, sizeof(opt)) < 0) {
     perror("setsockopt(HCI_DATA_DIR)");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
@@ -118,16 +122,19 @@ int main(int argc, char **argv) {
 
   if ((l2_sock = socket(PF_BLUETOOTH, SOCK_RAW, BTPROTO_L2CAP)) < 0) {
     perror("socket");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
   if (bind(l2_sock, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
     perror("bind");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
   if (connect(l2_sock, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
     perror("connect");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
@@ -135,6 +142,7 @@ int main(int argc, char **argv) {
   socklen_t l2_conninfolen = sizeof(l2_conninfo);
   if (getsockopt(l2_sock, SOL_L2CAP, L2CAP_CONNINFO, &l2_conninfo, &l2_conninfolen) < 0) {
     perror("getsockopt");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return 1;
   }
 
@@ -190,6 +198,7 @@ int main(int argc, char **argv) {
 
   if (make_socket_non_blocking(hci_socket) == -1) {
     perror("Failed to set socket to non-blocking");
+    printf("SBLEEDY_GONZALES DATA: code=0, data=Error during execution\n");
     return -1;
   }
 
