@@ -71,7 +71,8 @@ setup(
         'bleak',
         'pwntools',
         'pydbus',
-        'btlejack'
+        'btlejack',
+        'pyhackrf'
     ],
     cmdclass={
         'init_submodules': InitSubmodules,

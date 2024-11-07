@@ -9,6 +9,7 @@ venv3/
 
 results/*
 helpers/blueshark/logs/*
+helpers/blueshark/ice9-bluetooth
 
 modules/bleedingtooth/*
 !modules/bleedingtooth/*.*

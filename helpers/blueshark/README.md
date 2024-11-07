@@ -12,14 +12,17 @@ It is also relatively inexpensive.
 
 ## Installation
 
+### nRF52840
 Before using BlueShark, ensure you have flashed the nRF Sniffer firmware and set up Wireshark for BLE. Follow the instructions in this [manual](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_sniffer_ble%2FUG%2Fsniffer_ble%2Finstalling_sniffer.html&cp=11_5_2).
 
 Dependencies: pyserial >= 3.5, psutil
 ```bash
 pip install "pyserial>=3.5" psutil
 ```
-
-The HackRF sniffer requires:
+### HackRF One
+Please follow the instructions on <https://github.com/mikeryan/ice9-bluetooth-sniffer>.
+Install the required dependencies, clone the repository and follow the build instructions ('make install' is not necessary).
+After the exe (ice9-bluetooth) is being compiled, copy it to helpers/blueshark.
 ```bash
 sudo apt install libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev
 ```
