@@ -3,25 +3,19 @@ import re
 import subprocess
 import sys
 
-logging.basicConfig(
-  level=logging.DEBUG,
-  format='[%(asctime)s.%(msecs)03d] %(message)s',
-  datefmt="%Y-%m-%d %H:%M:%S"
-)
-
 class Log:
   def status(self, msg):
-    logging.info("\033[0;96m%s\033[0m" % msg)
+    print(msg)
   def success(self, msg):
-    logging.info("\033[0;92m%s\033[0m" % msg)
+    print(msg)
   def error(self, msg):
-    logging.error("\033[0m%s\033[0m" % msg)
+    print(msg)
   def debug(self, msg):
-    logging.debug("\033[0m%s\033[0m" % msg)
+    print(msg)
   def notice(self, msg):
-    logging.info("\033[0;93m%s\033[0m" % msg)
+    print(msg)
   def info(self, msg):
-    logging.info(msg)
+    print(msg)
     
 log = Log()
 

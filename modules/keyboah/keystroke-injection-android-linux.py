@@ -48,7 +48,7 @@ def connect_to_sdp(client):
         elapsed_time = time.time() - start_time
         if elapsed_time > timeout:
             log.error("Failed to connect to SDP within the timeout period")
-            report_not_vulnerable("Device didn't allow connection to SDP")
+            report_not_vulnerable("Device didn't allow connection to SDP STOP")
             stop_event.set()
             return  # Exit if the connection fails and stop_event is set
 
@@ -84,7 +84,7 @@ def connect_hid_services(client):
             elapsed_time = time.time() - start
             if elapsed_time > timeout:
                 log.error("Failed to connect to HID Interrupt within the timeout period")
-                report_not_vulnerable("Device didn't allow connection to HID Interrupt")
+                report_not_vulnerable("Device didn't allow connection to HID Interrupt STOP")
                 stop_event.set()
                 return  # Exit if the connection fails and stop_event is set
             log.debug("Connecting to HID Interrupt")
@@ -98,7 +98,7 @@ def connect_hid_services(client):
             elapsed_time = time.time() - start
             if elapsed_time > timeout:
                 log.error("Failed to connect to HID Control within the timeout period")
-                report_not_vulnerable("Device didn't allow connection to HID Control")
+                report_not_vulnerable("Device didn't allow connection to HID Control STOP")
                 stop_event.set()
                 return  # Exit if the connection fails and stop_event is set
             log.debug("Connecting to HID Control")
@@ -177,7 +177,7 @@ def main():
         if client is not None and not stop_event.is_set():
             client.send_ascii("hi there")
             time.sleep(2)
-            report_vulnerable("Key injection worked")
+            report_vulnerable("Key injection worked STOP")
     except KeyboardInterrupt:
         log.error("Keyboard interrupt")
 

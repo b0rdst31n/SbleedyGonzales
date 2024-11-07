@@ -241,6 +241,7 @@ class Sbleedy():
         return result
 
     def test_one_by_one(self, target, parameters, exploits) -> None:
+        print("¡Arriba! ¡Arriba! ¡Ándale! ¡Ándale!")
         for i in tqdm(range(0, len(exploits), 1), desc="Testing exploits"):
             #self.check_target(target)
             response_code, data = self.test_exploit(target, exploits[i], parameters)

@@ -174,6 +174,10 @@ class SbleedyEngine:
         keyword_index = data.find(keyword)
         if keyword_index != -1:
             data = data[keyword_index:]
+            print(data)
+            newline_index = data.find(b' STOP')
+            if newline_index != -1:
+                data = data[:newline_index]
         try:
             mm = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA, re.DOTALL)
             output = mm.search(data).group()
