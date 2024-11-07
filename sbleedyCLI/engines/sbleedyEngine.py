@@ -28,12 +28,11 @@ class SbleedyEngine:
         parameters_dict = self.process_additional_parameters(parameters)
         parameters_list = self.get_parameters_list(parameters)
 
-        if current_exploit.python_version:
-            if current_exploit.python_version == 2.7:
-                exploit_command = [os.path.join(const.VENV2_PATH, "python")] + exploit_command
-            else:
-                exploit_command.insert(0, "python")
-        else:
+        if current_exploit.file_type == "python2.7":
+            exploit_command = [os.path.join(const.VENV2_PATH, "python")] + exploit_command
+        elif current_exploit.file_type == "python3":
+            exploit_command.insert(0, "python")
+        elif current_exploit.file_type == "c":
             exploit_command.insert(0, "sudo")
             os.chdir(directory)
             poc_file = current_exploit.command.lstrip("./")
