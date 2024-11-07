@@ -27,7 +27,7 @@ RETURN_CODE_STATUS = {
 
 def report_data(code, data):
     logging.info("SBLEEDY_GONZALES DATA: code={code}, data={data}".format(code=code, data=data))
-    print("SBLEEDY_GONZALES DATA: code={code}, data={data}".format(code=code, data=data))
+    print("SBLEEDY_GONZALES DATA: code={code}, data={data} STOP".format(code=code, data=data))
 
 def report_not_vulnerable(data):
     report_data(const.RETURN_CODE_NOT_VULNERABLE, data)

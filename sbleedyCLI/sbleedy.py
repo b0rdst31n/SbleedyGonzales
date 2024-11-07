@@ -76,7 +76,7 @@ class Sbleedy():
             available_exploits = self.get_available_exploits()
         available_hardware = self.get_available_hardware()
         hardware_verified = self.hardwareEngine.verify_setup_multiple_hardware(available_hardware)
-        return [exploit for exploit in available_exploits if all(hardware_verified.get(hw.strip()) for hw in exploit.hardware.split(','))]
+        return [exploit for exploit in available_exploits if exploit.hardware == "" or all(hardware_verified.get(hw.strip()) for hw in exploit.hardware.split(','))]
 
     def print_exploit_info(self, exploits_to_print: list):
         exploits_to_print = self.exploitEngine.get_exploits_by_index(exploits_to_print)
@@ -122,7 +122,7 @@ class Sbleedy():
         for index, exploit in enumerate(available_exploits, start=1):
             symbol_hardware = '[red]X[/red]' 
             symbol_automated = '[red]X[/red]' 
-            if all(hardware_verified[hw.strip()] for hw in exploit.hardware.split(',')):
+            if exploit.hardware == "" or all(hardware_verified[hw.strip()] for hw in exploit.hardware.split(',')):
                 symbol_hardware = '[green]✓[/green]'  
             if exploit.mass_testing:
                 symbol_automated = '[green]✓[/green]'  

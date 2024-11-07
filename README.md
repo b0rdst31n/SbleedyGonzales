@@ -129,3 +129,4 @@ This framework includes the following PoC implementations for BLE vulnerabilitie
 - [Keystroke Injection](https://github.com/marcnewlin/hi_my_name_is_keyboard) by Marc Newlin
 - [Custom BlueToolkit Exploits](https://github.com/sgxgsx/BlueToolkit) by sgxgsx
 - [Btlejacking](https://github.com/virtualabs/btlejack) by virtualabs
+- [Crackle](https://github.com/mikeryan/crackle) by mikeryan
