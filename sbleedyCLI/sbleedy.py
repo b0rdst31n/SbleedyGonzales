@@ -7,6 +7,7 @@ import signal
 import time
 import re
 import textwrap
+import serial.tools.list_ports
 from tqdm import tqdm
 from pathlib import Path
 from rich.table import Table
@@ -198,7 +199,7 @@ class Sbleedy():
         logging.info(f"start_from_cli_all -> chosen exploit amount - {len(exploits)}")
 
         if self.only_automated:
-            print("Skipping all exploits that require user handling while executing.")
+            print("Skipping all exploits that require user handling while executing (due to missing -wi flag).")
             logging.info("Skipping all exploits that require user handling while executing.")
             exploits = [exploit for exploit in exploits if exploit.mass_testing]
             logging.info("There are {} exploits to work on".format(len(exploits)))
@@ -217,7 +218,13 @@ class Sbleedy():
             logging.info("There are {} exploits to work on".format(len(exploits)))
 
         if any([exploit for exploit in exploits if "sweyntooth" in exploit.name]):
-            print("[i] Please make sure that Sweyntooth firmware is on the nRF dongle (run sbleedy -fhw nRF52840)")
+            nRF_port = self.hardwareEngine.get_hardware_port("nRF52840")
+            ports = serial.tools.list_ports.comports()
+            for port in ports:
+                if port.device == nRF_port:
+                    if "Bluefruit" not in port.description:
+                        print(f"\n[!] It seems like the nRF isn't running with the Sweyntooth Firmware, but with '{port.description}' instead. Please run 'sbleedy -fhw nRF52840' to flash the necessary firmware for the Sweyntooth exploits.")
+                        break
         
         return exploits
     

@@ -13,7 +13,7 @@ class Recon():
         logging.basicConfig(filename=const.LOG_FILE, level=logging.INFO)
 
     def run_command(self, target, command, filename):
-        print("Running command -> {}".format(command))
+        print(f"Running command -> {command.format(target=target)}")
         try:
             output = subprocess.check_output(command.format(target=target), shell=True).decode()
             f = open(filename, 'w')
