@@ -12,6 +12,8 @@ dependencies = [
     "pyyaml",
     "rich",
     "setuptools",
+    "wheel",
+    "pkgconfig",
     "nrfutil",
     "pyserial",
     "psutil",
