@@ -5,12 +5,13 @@ import subprocess
 import signal
 import psutil
 import time
+import sys
 
 from sbleedyCLI.report import report_vulnerable, report_not_vulnerable, report_error
 from sbleedyCLI.constants import LOG_FILE
 
-HCITOOL_SCAN = "sudo hcitool scan"
-HCITOOL_INFO = "sudo hcitool info {target}"
+HCITOOL_SCAN = "sudo -S hcitool scan"
+HCITOOL_INFO = "sudo -S hcitool info {target}"
 BLUETOOTHCTL_PAIR = "bluetoothctl pair {target}"
 BLUETOOTHCTL_REMOVE = "bluetoothctl remove {target}"
 BLUETOOTHCTL_CONNECT = "bluetoothctl connect {target}"
@@ -104,6 +105,7 @@ if __name__ == "__main__":
 
     if args.target:
         print(INSTRUCTIONS)
+        sys.stdout.flush()
         check_nino(args.target)
     else:
         parser.print_help()

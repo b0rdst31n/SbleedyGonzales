@@ -128,6 +128,8 @@ class SbleedyEngine:
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit.name, exploit_command))
+            if self.verbosity or not exploit.mass_testing:
+                print("\n")
             with open(const.EXPLOIT_LOG_FILE.format(target=target), "w") as f:
                 f.write(f"\n\nEXPLOIT: {exploit.name}\n")
 
@@ -178,7 +180,11 @@ class SbleedyEngine:
                 data = data[:newline_index]
         try:
             mm = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA, re.DOTALL)
-            output = mm.search(data).group()
+            output = mm.search(data)
+            if output is None:
+                return const.RETURN_CODE_NONE_OF_4_STATE_OBSERVED, "No result data returned from exploit"
+            else:
+                output = output.group()
             logging.info("SbleedyEngine.process_raw_data -> Found data from the exploit {}".format(output))
             
             mm2 = re.compile(const.REGEX_EXPLOIT_OUTPUT_DATA_CODE)

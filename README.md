@@ -100,7 +100,8 @@ Run sbleedy and list all available exploits:
    $ sudo sbleedy -l
 
 Documentation is available at the [SbleedyGonzales Wiki](https://github.com/b0rdst31n/SbleedyGonzales/wiki).
-To get the mac address of your target device, there is a helper script available (see Wiki - Helper Scripts).
+To get the mac address of your target device, there is a helper script available for BLE devices (see Wiki - Helper Scripts), or just use
+the standard Linux commands such as 'sudo hcitool scan' (BR/EDR) or 'sudo hcitool lescan' (LE).
 ```
 
 ## Credit
