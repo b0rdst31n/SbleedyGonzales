@@ -55,6 +55,7 @@ The tool requires Python2.7 and Python3.10, as well as pip for both versions, bu
    ```bash
    source venv3/bin/activate
    sbleedy -h #should print usage info
+   # Maybe you have to run 'pip install .' again after activating the venv3
    ```
 
 
