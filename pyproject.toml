@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SbleedyGonzales"
+version = "1.0"
+description = "Description of your project"
+readme = "README.md"
+requires-python = ">=3.6"
+dependencies = [
+    "pyyaml",
+    "rich",
+    "setuptools",
+    "nrfutil",
+    "pyserial",
+    "psutil",
+    "tqdm",
+    "scapy",
+    "colorama",
+    "tabulate",
+    "bleak",
+    "pwntools",
+    "pydbus",
+    "btlejack",
+    "pyhackrf"
+]
+
+[project.scripts]
+sbleedy = "sbleedyCLI.sbleedy:main"
+
+[tool.setuptools.packages]
+find = {}

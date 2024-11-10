@@ -1,7 +1,14 @@
 import os
 from pathlib import Path
 
-TOOL_DIRECTORY = str(Path(__file__).resolve().parents[1])
+current_path = Path(__file__).resolve()
+while current_path != current_path.root:
+    if (current_path / "pyproject.toml").exists():
+        TOOL_DIRECTORY = str(current_path)
+        break
+    current_path = current_path.parent
+else:
+    TOOL_DIRECTORY = str(Path(__file__).resolve().parents[1])
 RESULT_DIRECTORY = TOOL_DIRECTORY + '/results/'
 LOG_FILE = TOOL_DIRECTORY + '/results/application.log'
 EXPLOIT_YAML_DIRECTORY = TOOL_DIRECTORY + '/exploits/'

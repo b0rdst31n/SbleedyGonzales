@@ -1,14 +1,30 @@
 #!/bin/bash
 
 VENV_DIR="${PWD}"
+SUCCESS=()
+ERRORS=()
+
+# Function to print colored messages
+print_message() {
+    COLOR=$1
+    MESSAGE=$2
+    RESET='\033[0m'
+    echo -e "${COLOR}${MESSAGE}${RESET}"
+}
+
+# Colors for messages
+GREEN='\033[0;32m'
+RED='\033[0;31m'
 
 # Function to check if a Python version exists
 check_python_version() {
     if command -v $1 &> /dev/null
     then
-        echo "$1 is installed."
+        print_message $GREEN "$1 is installed."
+        SUCCESS+=("$1 is installed.")
     else
-        echo "$1 is not installed."
+        print_message $RED "$1 is not installed."
+        ERRORS+=("$1 is not installed.")
     fi
 }
 
@@ -21,131 +37,116 @@ confirm() {
     esac
 }
 
-# Check if Python 3.10 is installed
-check_python_version "python3.10"
+# Check and optionally install Python versions
+check_and_install_python() {
+    local python_version=$1
+    local install_cmd=$2
 
-# Check if Python 2.7 is installed
-check_python_version "python2.7"
+    if ! command -v $python_version &> /dev/null; then
+        if confirm "$python_version is not installed. Would you like to install it?"; then
+            eval $install_cmd
+            if command -v $python_version &> /dev/null; then
+                print_message $GREEN "$python_version installed successfully."
+                SUCCESS+=("$python_version installed.")
+            else
+                print_message $RED "Failed to install $python_version."
+                ERRORS+=("Failed to install $python_version.")
+            fi
+        else
+            print_message $RED "Skipping $python_version installation."
+            ERRORS+=("Skipped $python_version installation.")
+        fi
+    fi
+}
 
-# Ask if user wants to install Python 3.10 if it's not installed
-if ! command -v python3.10 &> /dev/null; then
-    if confirm "Python 3.10 is not installed. Would you like to install it?"; then
-        # Install required build dependencies for Python
-        sudo apt update
-        sudo apt install -y \
-            build-essential \
-            libssl-dev \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libreadline-dev \
-            libsqlite3-dev \
-            libgdbm-dev \
-            libdb5.3-dev \
-            libbz2-dev \
-            libexpat1-dev \
-            liblzma-dev \
-            tk-dev \
-            libffi-dev \
-            curl \
-            bluez-tools \
-            bluez-hcidump \
-            libbluetooth-dev \
-            git \
-            gcc \
-            python3-pip \
-            python3-setuptools \
-            python3-pydbus
+# Install Python 3.10 if not installed
+check_and_install_python "python3.10" "sudo apt update && sudo apt install -y build-essential libssl-dev zlib1g-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libgdbm-dev libbz2-dev libexpat1-dev liblzma-dev tk-dev libffi-dev curl && cd /usr/src && sudo curl -O https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz && sudo tar xzf Python-3.10.0.tgz && cd Python-3.10.0 && sudo ./configure --enable-optimizations && sudo make -j$(nproc) && sudo make altinstall && sudo rm -rf /usr/src/Python-3.10.0*"
 
-        # Download Python 3.10 source code from python.org
-        PYTHON_VERSION="3.10.0"
-        cd /usr/src
-        sudo curl -O https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+# Install Python 2.7 if not installed
+check_and_install_python "python2.7" "sudo apt update && sudo apt install -y python2.7"
 
-        # Extract the downloaded tarball
-        sudo tar xzf Python-$PYTHON_VERSION.tgz
+# Install pip and virtualenv for Python versions if installed
+install_pip_and_virtualenv() {
+    local python_version=$1
+    local get_pip_url=$2
 
-        # Compile and install Python 3.10
-        cd Python-$PYTHON_VERSION
-        sudo ./configure --enable-optimizations
-        sudo make -j$(nproc)
-        sudo make altinstall
-
-        # Clean up source files
-        sudo rm -rf /usr/src/Python-$PYTHON_VERSION.tgz /usr/src/Python-$PYTHON_VERSION
-
-        # Verify Python 3.10 installation
-        python3.10 --version
+    if command -v $python_version &> /dev/null; then
+        curl -s $get_pip_url -o get-pip.py
+        $python_version get-pip.py && $python_version -m pip install virtualenv
+        rm -f get-pip.py
+        print_message $GREEN "Pip and virtualenv installed for $python_version."
+        SUCCESS+=("Pip and virtualenv installed for $python_version.")
     else
-        echo "Skipping Python 3.10 installation."
+        ERRORS+=("$python_version is not available for pip/virtualenv installation.")
     fi
-fi
+}
 
-# Ask if user wants to install Python 2.7 if it's not installed
-if ! command -v python2.7 &> /dev/null; then
-    if confirm "Python 2.7 is not installed. Would you like to install it?"; then
-        sudo apt update
-        sudo apt install -y python2.7
-        python2.7 --version
+install_pip_and_virtualenv "python3.10" "https://bootstrap.pypa.io/get-pip.py"
+install_pip_and_virtualenv "python2.7" "https://bootstrap.pypa.io/pip/2.7/get-pip.py"
+
+# Check and create virtual environments
+create_virtualenv() {
+    local venv_name=$1
+    local python_version=$2
+
+    if [ ! -d "$VENV_DIR/$venv_name" ]; then
+        if command -v $python_version &> /dev/null; then
+            $python_version -m virtualenv -p $python_version "$VENV_DIR/$venv_name"
+            print_message $GREEN "Created virtual environment $venv_name with $python_version at $VENV_DIR."
+            SUCCESS+=("$venv_name created with $python_version.")
+        else
+            print_message $RED "$python_version is not available for virtual environment creation."
+            ERRORS+=("$venv_name creation failed.")
+        fi
     else
-        echo "Skipping Python 2.7 installation."
+        print_message $GREEN "Virtual environment $venv_name already exists."
+        SUCCESS+=("$venv_name already exists.")
     fi
-fi
+}
 
-# Install pip for Python 3.10 and Python 2.7 if they are installed
-if command -v python3.10 &> /dev/null; then
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-    python3.10 get-pip.py
-    python3.10 -m pip install virtualenv
-fi
+create_virtualenv "venv3" "python3.10"
+create_virtualenv "venv2" "python2.7"
 
-if command -v python2.7 &> /dev/null; then
-    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-    python2.7 get-pip.py
-    python2.7 -m pip install virtualenv
-fi
-
-# Ask user for confirmation to create virtual environments
-if confirm "Would you like to create virtual environments (venv3 for Python 3.10 and venv2 for Python 2.7)?"; then
-    # Create virtual environment venv3 with Python 3.10 in the current directory
-    if command -v python3.10 &> /dev/null; then
-        python3.10 -m virtualenv -p python3.10 "$VENV_DIR/venv3"
-        echo "Created virtual environment venv3 with Python 3.10 at $VENV_DIR."
-    fi
-
-    # Create virtual environment venv2 with Python 2.7 in the current directory
-    if command -v python2.7 &> /dev/null; then
-        python2.7 -m pip install setuptools
-        python2.7 -m virtualenv -p python2.7 "$VENV_DIR/venv2"
-        echo "Created virtual environment venv2 with Python 2.7 at $VENV_DIR."
-    fi
-else
-    echo "Skipping virtual environment creation."
+# Install requirements in venv2 (Python 2.7)
+if [ -d "$VENV_DIR/venv2" ]; then
+    source "$VENV_DIR/venv2/bin/activate"
+    cd "$VENV_DIR/modules/sweyntooth"
+    sudo apt install python2-dev gcc g++ make -y
+    pip install -r requirements.txt
+    cd ./libs/smp_server/ && make clean && make build && make install && cd ../../
+    SUCCESS+=("Dependencies installed in venv2.")
+    deactivate
 fi
 
 # Install dependencies in venv3 (Python 3.10)
 if [ -d "$VENV_DIR/venv3" ]; then
-    echo "Activating venv3..."
     source "$VENV_DIR/venv3/bin/activate"
-    echo "Installing dependencies with pip in venv3..."
-    python setup.py install && pip install .
+    git submodule update --init --recursive
+    if [ -d "$VENV_DIR/helpers/pybluez" ]; then
+        cd "$VENV_DIR/helpers/pybluez" && pip install . && cd ../../
+        SUCCESS+=("pybluez installed.")
+    else
+        print_message $RED "Error: helpers/pybluez directory not found."
+        ERRORS+=("helpers/pybluez directory not found.")
+    fi
+    if [ -d "$VENV_DIR/helpers/bluing" ]; then
+        cd "$VENV_DIR/helpers/bluing" && env CFLAGS="-lm" pip install . && cd ../../
+        SUCCESS+=("bluing installed.")
+    else
+        print_message $RED "Error: bluing directory not found."
+        ERRORS+=("bluing directory not found.")
+    fi
+    pip install .
+    SUCCESS+=("Sbleedy installed in venv3.")
     deactivate
-    echo "Dependencies installed in venv3."
 fi
 
-# Install requirements in venv2 (Python 2.7)
-if [ -d "$VENV_DIR/venv2" ]; then
-    echo "Activating venv2..."
-    source "$VENV_DIR/venv2/bin/activate"
-    echo "Changing directory to modules/sweyntooth..."
-    cd "$VENV_DIR/modules/sweyntooth"
-    echo "Installing sweyntooth in venv2..."
-    sudo ./install_sweyntooth.sh
-    deactivate
-    echo "Dependencies installed in venv2."
-fi
-
-# Clean up
-rm -f "$VENV_DIR/get-pip.py"
-
-echo "Script completed."
+# Summary of script completion
+echo
+echo "Summary of Installation:"
+for msg in "${SUCCESS[@]}"; do
+    print_message $GREEN "✔ $msg"
+done
+for msg in "${ERRORS[@]}"; do
+    print_message $RED "✖ $msg"
+done
