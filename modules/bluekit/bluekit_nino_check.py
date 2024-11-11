@@ -53,7 +53,6 @@ def check_nino(target):
 
         if output is not None and target in output:
             time.sleep(1)
-            logging.info("stage this") 
 
             # Required to get information about the device, otherwise won't connect
             try:
@@ -66,8 +65,9 @@ def check_nino(target):
                 subprocess.check_output(BLUETOOTHCTL_PAIR.format(target=target), shell=True)
             except subprocess.CalledProcessError as e:
                 logging.info("nino_check.py -> Error pairing with the device: {}".format(e.output))
-                #return
-            logging.info("stage three")
+                print(str(e))
+                return
+            
             # Connect to the paired device
             try:
                 output = subprocess.check_output(BLUETOOTHCTL_CONNECT.format(target=target), shell=True).decode()
@@ -83,6 +83,8 @@ def check_nino(target):
             except subprocess.CalledProcessError as e:
                 logging.info("nino_check.py -> Error connecting to the device: {}".format(e.output))
                 report_error("Couldn't connect to a device, error while connecting")
+        else:
+            report_not_vulnerable("Target not found by HCITOOL SCAN. Does it support BR/EDR?")
     except Exception as e:
         logging.info("nino_check.py -> Error: {}".format(str(e)))
         report_error("nino_check.py -> strange error: {}".format(str(e)))
@@ -104,8 +106,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
     if args.target:
-        print(INSTRUCTIONS)
-        sys.stdout.flush()
+        print(INSTRUCTIONS, flush=True)
         check_nino(args.target)
     else:
         parser.print_help()
