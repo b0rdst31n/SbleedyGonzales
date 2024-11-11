@@ -64,14 +64,6 @@ def find_and_extract_data(target, data):
         print("Strange exception happenned")
     return data
 
-def get_bt_version(target):
-    device_info_file = Path(RECON_DIRECTORY.format(target=target) + DEVICE_INFO)
-    version_pattern = r"Bluetooth Version: ([\d.]+|Unknown)"
-    version_match = re.search(version_pattern, output)
-    if version_match:
-        version_str = version_match.group(1)
-        return float(version_str) if version_str != "Unknown" else None
-
 def evaluate_data_sc(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):
         logging.info("Prerequisites for lmp_file are not satisfied. exiting")
@@ -96,7 +88,8 @@ def evaluate_data_blur(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
         report_error("There is no lmp file from recon script")
         return
     
-    version = get_bt_version(target)
+    r = Recon()
+    version = float(r.determine_bluetooth_version(target))
     if version is not None and version < 4.2:
         report_not_vulnerable("Target device doesn't use Bluetooth 4.2+")
         return
@@ -114,7 +107,7 @@ def evaluate_data_blur(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
         else:
             report_not_vulnerable("No simultaneous LE BR/EDR supported, Cross transport attacks are not going to work")
     else:
-        report_not_vulnerable("No LE supported, Cross transport attacks are not going to work")
+        report_not_vulnerable("No LE supported (Controller + Host), Cross transport attacks are not going to work")
 
 def evaluate_data_ssp(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     if check_prerequisites_not_satisfied(target):

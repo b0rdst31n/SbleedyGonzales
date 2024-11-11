@@ -9,8 +9,8 @@ import time
 from sbleedyCLI.report import report_vulnerable, report_not_vulnerable, report_error
 from sbleedyCLI.constants import LOG_FILE
 
-HCITOOL_SCAN = "sudo hcitool scan"
-HCITOOL_INFO = "sudo hcitool info {target}"
+HCITOOL_SCAN = "sudo -S hcitool scan"
+HCITOOL_INFO = "sudo -S hcitool info {target}"
 BLUETOOTHCTL_PAIR = "bluetoothctl pair {target}"
 BLUETOOTHCTL_REMOVE = "bluetoothctl remove {target}"
 BLUETOOTHCTL_CONNECT = "bluetoothctl connect {target}"
@@ -91,17 +91,15 @@ def check_numeric_wrong_implementation(target):
     
     while True:
         answer = input("\nIf the device didn't show you buttons to pair and deny pairing then it is vulnerable\nIs it vulnerable?(Yes/No/Error):\n")
-        print(answer)
-        print(len(answer))
 
         if answer.lower().strip() == "yes":
-            report_vulnerable("vuln")
+            report_vulnerable("Marked by the user as vulnerable")
             break
         elif answer.lower().strip() == "no":
-            report_vulnerable("no")
+            report_vulnerable("Marked by the user as not vulnerable")
             break
-        elif answer.lower().strip() == "erorr":
-            report_error("error")
+        elif answer.lower().strip() == "error":
+            report_error("According to the user an error occured")
             break
         else:
             print("Didn't understand your input. It should be one of the following: Yes/No/Error")
@@ -117,7 +115,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
     if args.target:
-        print(INSTRUCTIONS + "\n")
+        print(INSTRUCTIONS + "\n", flush=True)
         check_numeric_wrong_implementation(args.target)
     else:
         parser.print_help()

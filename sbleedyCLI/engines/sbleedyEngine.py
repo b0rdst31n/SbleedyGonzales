@@ -149,6 +149,7 @@ class SbleedyEngine:
                         f.flush()
                         if self.verbosity or not exploit.mass_testing:
                             print(output.strip())
+                            sys.stdout.flush()
                 
                 process.wait()
                 data = True, output_bytes

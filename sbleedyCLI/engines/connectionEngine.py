@@ -62,7 +62,7 @@ def check_availability_bredr(target):
         else:
             return False
     except Exception as e:
-        print(f"An error occurred: {e}")
+        #print(f"An error occurred: {e}")
         return False
 
 def check_availability(target):

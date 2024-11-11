@@ -147,7 +147,7 @@ class Sbleedy():
         print("\nChecking device availability...")
         cont = True
         while cont:
-            for i in range(5):
+            for i in range(2):
                 available = check_availability(target)
                 if available:
                     return True
