@@ -87,8 +87,12 @@ class Report:
         logging.info("Report.generate_report -> all_exploits = " + str(all_exploits))
         logging.info("Report.generate_report -> skipped_exploits = " + str(skipped_exploits))
 
-        headers = ['Exploit', 'Result', 'Data', 'CVE']
+        headers = ['Index', 'Exploit', 'Result', 'Data', 'CVE']
+        
         sorted_done_exploits = sorted(done_exploits, key=lambda x: x[2])
+        sorted_all_exploits = sorted(all_exploits, key=lambda exploit: exploit.name)
+        indexed_exploits = [(index + 1, exploit) for index, exploit in enumerate(sorted_all_exploits)]
+        index_map = {exploit.name: index for index, exploit in indexed_exploits}
 
         print("\n")
         table = Table(title="Exploit Report", padding=[0,1,1,1])
@@ -111,7 +115,9 @@ class Report:
                 symbol = '⚠'
             
             color, status = RETURN_CODE_STATUS.get(code, ("yellow", "Toolkit error during report generation"))
+            index = index_map.get(exploit, '?')
             table.add_row(
+                f"{index}",
                 f"[{color}]{exploit}[/{color}]",
                 f"[{color}]{status} {symbol}[/{color}]",
                 data[:const.MAX_CHARS_DATA_TRUNCATION],
@@ -119,7 +125,8 @@ class Report:
             )
 
         for skipped_exploit in skipped_exploits:
-            table.add_row(f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
+            index = index_map.get(skipped_exploit, '?')
+            table.add_row(f"{index}", f"[white]{skipped_exploit}[/white]", "[white]Not tested[/white]", "", "")
 
         logging.info("Report.generate_report -> table_data created")
 
