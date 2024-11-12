@@ -27,37 +27,7 @@ Read the [SbleedyGonzales Wiki-Page](https://github.com/b0rdst31n/SbleedyGonzale
 
 - **BLE Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
 
-The tool requires Python2.7 and Python3.10, as well as pip for both versions, but everything that is needed can be installed with a script as explained in the next section.
-
-### Step-by-Step Installation
-
-1. **Clone the Repository**:
-
-    ```bash
-    git clone https://github.com/b0rdst31n/SbleedyGonzales.git --recurse-submodules
-    cd SbleedyGonzales
-    ```
-
-2. **Create Virtual Environments and Install Dependencies**:
-    Sbleedy Gonzales requires separate environments for Python 2.7 and Python 3.10.
-    You can run the shell script helpers/sbleedy_installer.sh to get both python versions and their corresponding virtualenv versions, create a venv3 and venv2 and install the necessary dependencies and submodules in both venvs.
-
-      ```bash
-      sudo chmod +x helpers/sbleedy_installer.sh
-      helpers/sbleedy_installer.sh
-      ```
-
-      If you choose a different name for the Python 2.7 venv please adapt the VENV2_PATH in sbleedyCLI/constants.py.
-
-2. **Check Installation**:
-   If everything worked, you should now be able to activate the venv3 and run sbleedy.
-   
-   ```bash
-   source venv3/bin/activate
-   sbleedy -h #should print usage info
-   # Maybe you have to run 'pip install .' again after activating the venv3
-   ```
-
+The framework requires Python2.7 and Python3.10. There is a shell script provided to install these versions and all required dependencies in virtual environments. There's also a Docker image available to use SbleedyGonzales in a container with tools like Podman or Docker. Please refer to the [Installation Wiki Page](https://github.com/b0rdst31n/SbleedyGonzales/wiki/Installation) for further instructions.
 
 ## Usage
 
