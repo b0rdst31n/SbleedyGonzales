@@ -12,6 +12,7 @@ dependencies = [
     "pyyaml",
     "rich",
     "setuptools",
+    "pathlib",
     "wheel",
     "pkgconfig",
     "cmake",

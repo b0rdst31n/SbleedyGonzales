@@ -6,9 +6,6 @@ class Hardware():
         self.needs_setup_verification = details["needs_setup_verification"]
         self.port = ""
         self.firmware = details["firmware"]
-    
-    def check_setup():
-        return True
 
 
 

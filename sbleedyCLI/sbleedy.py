@@ -13,14 +13,14 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 
-from .constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY, RESULT_DIRECTORY, EXPLOIT_LOG_FILE
-from .engines.exploitEngine import ExploitEngine
-from .engines.hardwareEngine import HardwareEngine
-from .engines.sbleedyEngine import SbleedyEngine
+from sbleedyCLI.constants import TOOL_DIRECTORY, LOG_FILE, OUTPUT_DIRECTORY, RESULT_DIRECTORY, EXPLOIT_LOG_FILE
+from sbleedyCLI.engines.exploitEngine import ExploitEngine
+from sbleedyCLI.engines.hardwareEngine import HardwareEngine
+from sbleedyCLI.engines.sbleedyEngine import SbleedyEngine
 from sbleedyCLI.engines.connectionEngine import check_availability
-from .recon import Recon, get_device_info
-from .report import Report
-from .checkpoint import Checkpoint
+from sbleedyCLI.recon import Recon, get_device_info
+from sbleedyCLI.report import Report
+from sbleedyCLI.checkpoint import Checkpoint
 
 class Sbleedy():
     def __init__(self) -> None:
