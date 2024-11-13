@@ -94,21 +94,14 @@ else
     echo "Pip for Python 3.10 is already installed."
 fi
 
-if [ ! -d "${MAIN_DIR}/venv3" ]; then
-    python3.10 -m virtualenv ${MAIN_DIR}/venv3
-else
-    source ${MAIN_DIR}/venv3/bin/activate
-    python3.10 -m pip install --upgrade pip
-    deactivate
+# Add /home/kali/.local/bin to the PATH if not already added
+if [[ ":$PATH:" != *":/home/kali/.local/bin:"* ]]; then
+    echo 'export PATH="$PATH:/home/kali/.local/bin"' >> ~/.bashrc
+    source ~/.bashrc
 fi
 
-if [ ! -d "${MAIN_DIR}/venv2" ]; then
-    python2.7 -m virtualenv ${MAIN_DIR}/venv2
-else
-    source ${MAIN_DIR}/venv2/bin/activate
-    python2.7 -m pip install --upgrade pip
-    deactivate
-fi
+python3.10 -m virtualenv ${MAIN_DIR}/venv3
+python2.7 -m virtualenv ${MAIN_DIR}/venv2
 
 source ${MAIN_DIR}/venv2/bin/activate
 cd ${MAIN_DIR}/modules/sweyntooth
