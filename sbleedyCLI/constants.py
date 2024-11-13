@@ -1,8 +1,15 @@
 import os
 from pathlib import Path
 
-current_path = Path(__file__).resolve()
-TOOL_DIRECTORY = str((current_path).parent)
+def find_project_root(current_path, marker='.git'):
+    current_path = Path(current_path).resolve()
+    while current_path != current_path.parent:
+        if (current_path / marker).exists():
+            return str(current_path)
+        current_path = current_path.parent
+    return str(current_path)
+
+TOOL_DIRECTORY = find_project_root(__file__)
 RESULT_DIRECTORY = TOOL_DIRECTORY + '/results/'
 LOG_FILE = TOOL_DIRECTORY + '/results/application.log'
 EXPLOIT_YAML_DIRECTORY = TOOL_DIRECTORY + '/exploits/'
