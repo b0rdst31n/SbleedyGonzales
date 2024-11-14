@@ -62,7 +62,7 @@ if ! command -v python3.10 &> /dev/null; then
     make -j $(nproc)
     sudo make altinstall
     cd ..
-    sudo rm -rf Python-3.10.0*
+    #sudo rm -rf Python-3.10.0*
 else
     echo "Python 3.10 is already installed."
 fi
