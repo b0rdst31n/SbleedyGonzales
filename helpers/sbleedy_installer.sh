@@ -73,7 +73,7 @@ python3.10 --version
 python2.7 -m pip config set global.cert "$PIP_CERT"
 python3.10 -m pip config set global.cert "$PIP_CERT"
 
-if ! command -v python2.7 -m pip &> /dev/null; then
+if ! python2.7 -m pip --version &> /dev/null; then
     wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py
     wget https://files.pythonhosted.org/packages/27/79/8a850fe3496446ff0d584327ae44e7500daf6764ca1a382d2d02789accf7/pip-20.3.4-py2.py3-none-any.whl
     wget https://files.pythonhosted.org/packages/e1/b7/182161210a13158cd3ccc41ee19aadef54496b74f2817cc147006ec932b4/setuptools-44.1.1-py2.py3-none-any.whl
@@ -87,7 +87,7 @@ else
     python2.7 -m pip install virtualenv
 fi
 
-if ! command -v python3.10 -m pip &> /dev/null; then
+if ! python3.10 -m pip --version &> /dev/null; then
     sudo apt-get install -y python3-pip
     python3.10 -m pip install --upgrade pip --index-url http://pypi.python.org/simple/ --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
     python3.10 -m pip install virtualenv
