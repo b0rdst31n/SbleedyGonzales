@@ -122,6 +122,7 @@ def evaluate_data_ssp(target, data=[-1,-1,-1,-1,-1,-1,-1,-1]):
     
     if data[entry_to_data[SSP_SUP_C]] == -1 or data[entry_to_data[SSP_SUP_H]] == -1:
         report_error("There are required fields missing in the lmp file.")
+        return
 
     if data[entry_to_data[SSP_SUP_C]] and data[entry_to_data[SSP_SUP_H]]:
         # SSP supported

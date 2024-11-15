@@ -96,7 +96,7 @@ def check_numeric_wrong_implementation(target):
             report_vulnerable("Marked by the user as vulnerable")
             break
         elif answer.lower().strip() == "no":
-            report_vulnerable("Marked by the user as not vulnerable")
+            report_not_vulnerable("Marked by the user as not vulnerable")
             break
         elif answer.lower().strip() == "error":
             report_error("According to the user an error occured")
