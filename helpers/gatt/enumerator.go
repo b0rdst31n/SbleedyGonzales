@@ -329,6 +329,8 @@ func onPeriphConnected(p gatt.Peripheral, err error) {
 				multi = parseConnectionParams(raw)
 			} else if c.Name() == "Peripheral Privacy Flag" && sz >= 1 {
 				data = parsePrivacyFlag(raw)
+			} else if c.Name() == "Battery Level" && sz <= 2 {
+				data = pretty.Yellow(fmt.Sprintf("%d%%", raw[0]))
 			} else {
 				data = parseRawData(raw)
 			}
