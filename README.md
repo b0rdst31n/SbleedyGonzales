@@ -46,7 +46,7 @@ options:
                         Exclude exploits (e.g. --exclude exploit1, exploit2 OR --exclude 1,5)
   -in EXPLOITS [EXPLOITS ...], --include EXPLOITS [EXPLOITS ...]
                         Scan only for provided (e.g. --include exploit1, exploit2 OR --include 1-4), --exclude is not taken into account
-  -wi, --withinput      Also run non automated scripts (that require user input or interaction. e.g. to establish a connection), per default (without this flag) only automated scripts (mass_testing = true) are being executed
+  -wi, --withinput      Also run non automated scripts (that require user input or interaction. e.g. to establish a connection), per default (without this flag) only automated scripts (automated = true) are being executed
   -r, --recon           Run a recon script. Saved in results/{target mac}/recon/
   -re, --report         Create a report for a target device
   -rej, --reportjson    Create a report for a target device

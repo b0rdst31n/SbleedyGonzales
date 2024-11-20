@@ -125,7 +125,7 @@ class Sbleedy():
             symbol_automated = '[red]X[/red]' 
             if exploit.hardware == "" or all(hardware_verified[hw.strip()] for hw in exploit.hardware.split(',')):
                 symbol_hardware = '[green]✓[/green]'  
-            if exploit.mass_testing:
+            if exploit.automated:
                 symbol_automated = '[green]✓[/green]'  
 
             table.add_row(
@@ -201,7 +201,7 @@ class Sbleedy():
         if self.only_automated:
             print("Skipping all exploits that require user handling while executing (due to missing -wi flag).")
             logging.info("Skipping all exploits that require user handling while executing.")
-            exploits = [exploit for exploit in exploits if exploit.mass_testing]
+            exploits = [exploit for exploit in exploits if exploit.automated]
             logging.info("There are {} exploits to work on".format(len(exploits)))
 
         version, profile, manufacturer = get_device_info(target)
@@ -234,7 +234,7 @@ class Sbleedy():
             for hw in current_exploit.hardware.split(',')
         }
 
-        if not current_exploit.mass_testing:
+        if not current_exploit.automated:
             choice = input(f"Are you ready for the non-automated exploit {current_exploit.name}? (y/n) ")
             if choice.strip().lower() == "n":
                 print(f"[i] Exploit {current_exploit.name} is being skipped.")

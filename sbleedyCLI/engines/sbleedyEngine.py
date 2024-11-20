@@ -102,13 +102,13 @@ class SbleedyEngine:
                 sys.stdout.write('\b')
         spinner_thread = None
 
-        if current_exploit.mass_testing and not self.verbosity:
+        if current_exploit.automated and not self.verbosity:
             spinner_thread = threading.Thread(target=spinner_task)
             spinner_thread.start()
         try:
             if_failed, data = self.execute_command(target, exploit_command, current_exploit, timeout=current_exploit.max_timeout, directory=new_directory)
         finally:
-            if current_exploit.mass_testing and not self.verbosity:
+            if current_exploit.automated and not self.verbosity:
                 stop_spinner = True
                 spinner_thread.join()
 
@@ -128,7 +128,7 @@ class SbleedyEngine:
 
         try:
             self.logger.info("Starting the next exploit - name {} and command {}".format(exploit.name, exploit_command))
-            if self.verbosity or not exploit.mass_testing:
+            if self.verbosity or not exploit.automated:
                 print("\n")
             with open(const.EXPLOIT_LOG_FILE.format(target=target), "w") as f:
                 f.write(f"\n\nEXPLOIT: {exploit.name}\n")
@@ -147,7 +147,7 @@ class SbleedyEngine:
                         output_bytes += output.strip().encode()
                         f.write(output.strip() +  "\n")
                         f.flush()
-                        if self.verbosity or not exploit.mass_testing:
+                        if self.verbosity or not exploit.automated:
                             print(output.strip())
                             sys.stdout.flush()
                 
