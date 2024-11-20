@@ -1,10 +1,10 @@
 # SbleedyGonzales
 
-SbleedyGonzales is a command-line tool designed to run various exploits against Bluetooth Low Energy (BLE) devices. With its fast execution and easy-to-use interface, Sbleedy Gonzales allows security researchers and developers to identify vulnerabilities in BLE devices in an automated manner without requiring knowledge about BLE.
+SbleedyGonzales is a command-line tool designed to run various exploits against Bluetooth devices. With its fast execution and easy-to-use interface, Sbleedy Gonzales allows security researchers and developers to identify known vulnerabilities in BLE and BR/EDR devices in an automated manner without requiring knowledge about them.
 
 ## Features
 
-- **Multiple Exploit Support**: Run several BLE vulnerability exploits at once.
+- **Multiple Exploit Support**: Run several BLE + BR/EDR vulnerability exploits at once.
 - **Custom Exploit Execution**: Easily add new exploits and customize attack parameters.
 - **Detailed Reports**: Generates JSON-based reports for each exploit executed against a target device.
 - **Cross-Platform**: Compatible with Linux-based platforms with Bluetooth support.
@@ -25,9 +25,9 @@ Read the [SbleedyGonzales Wiki-Page](https://github.com/b0rdst31n/SbleedyGonzale
 
 ### Prerequisites
 
-- **BLE Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
+- **Bluetooth Adapter**: A compatible Bluetooth adapter that supports BLE (test by running hciconfig)
 
-The framework requires Python2.7 and Python3.10. There is a shell script provided to install these versions and all required dependencies in virtual environments. There's also a Docker image available to use SbleedyGonzales in a container with tools like Podman or Docker. Please refer to the [Installation Wiki Page](https://github.com/b0rdst31n/SbleedyGonzales/wiki/Installation) for further instructions.
+The framework requires Python2.7 and Python3.10. There is a shell script provided to install these versions and all required dependencies in virtual environments. There's also a Dockerfile available to use SbleedyGonzales in a container with tools like Podman or Docker. Please refer to the [Installation Wiki Page](https://github.com/b0rdst31n/SbleedyGonzales/wiki/Installation) for further instructions.
 
 ## Usage
 
