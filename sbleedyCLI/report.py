@@ -79,7 +79,11 @@ class Report:
         return exploits
 
     def generate_report(self, target):
-        done_exploits = self.get_done_exploits(target=target)
+        try:
+            done_exploits = self.get_done_exploits(target=target)
+        except Exception:
+            done_exploits = []
+
         all_exploits = self.exploitEngine.get_all_exploits()
         skipped_exploits = [exploit.name for exploit in all_exploits if exploit.name not in done_exploits]
 
