@@ -42,7 +42,7 @@ sudo apt-get -y update #&& sudo apt-get -y upgrade
 
 sudo apt-get install -y tzdata software-properties-common build-essential libssl-dev zlib1g-dev libncurses5-dev \
      libncursesw5-dev libreadline-dev libsqlite3-dev libgdbm-dev libbz2-dev libexpat1-dev liblzma-dev tk-dev libffi-dev \
-     curl python2.7 python2-dev gcc wget g++ make git bluez bluetooth usbutils libbluetooth-dev cmake libcairo2-dev \
+     curl python2.7 python2-dev gcc wget g++ make git bluez bluetooth usbutils libbluetooth-dev cmake libcairo2-dev golang-go \
      pkg-config libgirepository1.0-dev libdbus-1-dev bluez-tools python3-cairo-dev rfkill meson patchelf bluez adb python-is-python3
 
 sudo apt-get clean
