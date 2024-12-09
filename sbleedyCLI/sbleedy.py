@@ -240,7 +240,7 @@ class Sbleedy():
                 print(f"[i] Exploit {current_exploit.name} is being skipped.")
                 return 5, "Skipped by user"
 
-        print(f"Currently running {current_exploit.name}... ", end="")
+        print(f"\nCurrently running {current_exploit.name}... ", end="")
         sys.stdout.flush()
 
         result = self.engine.run_test(target, current_ports, current_exploit, parameters)

@@ -23,10 +23,8 @@ def dos_checker(target):
             if available:
                 return const.RETURN_CODE_NOT_VULNERABLE, f"Device not down"
             down_times += 1
-
-        if down_times > const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL or down_times == const.NUMBER_OF_DOS_TESTS:
-            return const.RETURN_CODE_VULNERABLE, f"Device down (tried {down_times} times)"
-        
+            if down_times == const.MAX_NUMBER_OF_DOS_TEST_TO_FAIL:
+                return const.RETURN_CODE_VULNERABLE, f"Device down (tried {down_times} times)"
         return const.RETURN_CODE_NOT_VULNERABLE, f"Device not down (tried {down_times} times)"
     except Exception as e:
         return const.RETURN_CODE_ERROR, str(e)
@@ -67,7 +65,7 @@ def check_availability_bredr(target):
 
 def check_availability(target):
     if not check_hci_device():
-        return
+        return False
     if asyncio.run(check_availability_le(target)):
         return True
     else:
